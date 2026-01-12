@@ -2,7 +2,7 @@ use anyhow::Context;
 
 use crate::routes::create_routes;
 
-pub async fn app(host: String, port: u16) -> anyhow::Result<()> {
+pub async fn serve(host: String, port: u16) -> anyhow::Result<()> {
     let app = create_routes();
     let address = format!("{}:{}", host, port);
 

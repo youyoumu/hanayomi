@@ -1,4 +1,4 @@
-use crate::app::app;
+use crate::server::serve;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
@@ -41,7 +41,7 @@ pub async fn cli() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Serve { port, host } => app(host, port).await?,
+        Commands::Serve { port, host } => serve(host, port).await?,
         Commands::Dict { action } => match action {
             DictCommands::Parse => {
                 println!("Parsing dictionary...");
