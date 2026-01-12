@@ -1,6 +1,6 @@
 mod app;
-mod error;
 mod routes;
+mod util;
 
 #[tokio::main]
 async fn main() {
