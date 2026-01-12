@@ -1,14 +1,19 @@
-use crate::routes::create_routes;
-use anyhow::Result;
+use anyhow::Context;
 
-pub async fn app(host: String, port: u16) -> Result<()> {
+use crate::routes::create_routes;
+
+pub async fn app(host: String, port: u16) -> anyhow::Result<()> {
     let app = create_routes();
     let address = format!("{}:{}", host, port);
 
-    println!("starting server at {}", address);
+    println!("Starting server at {}", address);
 
-    let listener = tokio::net::TcpListener::bind(address).await?;
-    axum::serve(listener, app).await?;
+    let listener = tokio::net::TcpListener::bind(address)
+        .await
+        .context("Failed bind TcpListener")?;
+    axum::serve(listener, app)
+        .await
+        .context("Failed to serve HTTP routes")?;
 
     Ok(())
 }

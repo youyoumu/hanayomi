@@ -41,13 +41,11 @@ enum DictCommands {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Serve { port, host } => {
-            let _ = app::app(host, port).await;
-        }
+        Commands::Serve { port, host } => app::app(host, port).await?,
         Commands::Dict { action } => match action {
             DictCommands::Parse => {
                 println!("Parsing dictionary...");
@@ -56,6 +54,8 @@ async fn main() {
                 println!("Checking dictionary...");
             }
         },
-    }
+    };
+
+    Ok(())
 }
 
