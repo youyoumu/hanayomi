@@ -1,9 +1,9 @@
 use crate::routes::create_routes;
 use anyhow::Result;
 
-pub async fn app() -> Result<()> {
+pub async fn app(host: String, port: u16) -> Result<()> {
     let app = create_routes();
-    let address = "127.0.0.1:3000";
+    let address = format!("{}:{}", host, port);
 
     println!("starting server at {}", address);
 
