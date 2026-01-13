@@ -1,4 +1,5 @@
 use crate::server::serve;
+use crate::util::dict::parse_dict;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
@@ -30,8 +31,11 @@ enum Commands {
 
 #[derive(Subcommand, Debug)]
 enum DictCommands {
-    #[command(about = "Check the dictionary")]
-    Parse,
+    #[command(about = "Parse the dictionary")]
+    Parse {
+        #[arg(long)]
+        workdir: Option<String>,
+    },
 
     #[command(about = "Check the dictionary")]
     Check,
@@ -43,8 +47,9 @@ pub async fn cli() -> anyhow::Result<()> {
     match cli.command {
         Commands::Serve { port, host } => serve(host, port).await?,
         Commands::Dict { action } => match action {
-            DictCommands::Parse => {
+            DictCommands::Parse { workdir } => {
                 println!("Parsing dictionary...");
+                parse_dict(workdir)?;
             }
             DictCommands::Check => {
                 println!("Checking dictionary...");
