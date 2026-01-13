@@ -35,6 +35,9 @@ enum DictCommands {
     Parse {
         #[arg(long)]
         workdir: Option<String>,
+
+        #[arg(long)]
+        dict: String,
     },
 
     #[command(about = "Check the dictionary")]
@@ -47,9 +50,9 @@ pub async fn cli() -> anyhow::Result<()> {
     match cli.command {
         Commands::Serve { port, host } => serve(host, port).await?,
         Commands::Dict { action } => match action {
-            DictCommands::Parse { workdir } => {
+            DictCommands::Parse { workdir, dict } => {
                 println!("Parsing dictionary...");
-                parse_dict(workdir)?;
+                parse_dict(workdir, dict)?;
             }
             DictCommands::Check => {
                 println!("Checking dictionary...");
