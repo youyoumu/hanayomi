@@ -103,31 +103,42 @@ fn should_parse_term_bank_12() {
 
 #[test]
 fn should_parse_term_bank_13() {
-    fn get_term_bank() -> Vec<Value> {
-        // Path is relative to the Cargo.toml of the package
-        let data = fs::read_to_string("src/fixtures/term_bank.json").unwrap();
-        let term_bank: Value = serde_json::from_str(&data).unwrap();
-        let term_bank = term_bank.as_array().unwrap();
-        term_bank.clone()
-    }
-
     let term = json!([get_term_bank().get(13).unwrap()]);
     let result: Result<DictionaryTermBankV3, _> = serde_json::from_value(term);
     assert!(result.is_ok());
     let result = result.unwrap();
-    let result_json = serde_json::to_string(&result).unwrap();
-
     let first = result.first().unwrap();
-    let first = first.5.first().unwrap();
+    let definition = first.5.first().unwrap();
 
-    if let Term::DetailedDefinition(definition) = first
+    if let Term::DetailedDefinition(definition) = definition
         && let DetailedDefinition::StructuredContent(sc) = definition.as_ref()
         && let StructuredContent::Object(obj) = sc.content.as_ref()
         && let StructuredContentObject::Img(img) = obj.as_ref()
     {
-        println!("{}", serde_json::to_string(&first).unwrap());
-        println!("path: {}", img.path);
-        println!("width: {}", img.width.unwrap());
+        assert_eq!(img.width.unwrap(), -1.0);
+        assert!(img.validate().is_err());
+    } else {
+        panic!("Failed to parse term");
+    }
+}
+
+#[test]
+fn should_parse_term_bank_14() {
+    let term = json!([get_term_bank().get(14).unwrap()]);
+    let result: Result<DictionaryTermBankV3, _> = serde_json::from_value(term);
+    assert!(result.is_ok());
+    let result = result.unwrap();
+    let first = result.first().unwrap();
+    let definition = first.5.first().unwrap();
+
+    if let Term::DetailedDefinition(definition) = definition
+        && let DetailedDefinition::StructuredContent(sc) = definition.as_ref()
+        && let StructuredContent::Object(obj) = sc.content.as_ref()
+        && let StructuredContentObject::Img(img) = obj.as_ref()
+    {
+        assert!(img.width.is_none());
+        assert_eq!(img.image_rendering, "pixelated");
+        assert!(img.validate().is_ok());
     } else {
         panic!("Failed to parse term");
     }

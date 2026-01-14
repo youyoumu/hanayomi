@@ -232,5 +232,27 @@
     ],
     1000600,
     ""
+  ],
+  [
+    "いい加減にしなさい",
+    "いいかげんにしなさい",
+    "",
+    "",
+    0,
+    [
+      {
+        "type": "structured-content",
+        "content": {
+          "tag": "img",
+          "data": {
+            "content": "sense-group"
+          },
+          "path": "image.jpg",
+          "imageRendering": "pixelated"
+        }
+      }
+    ],
+    1000600,
+    ""
   ]
 ]
