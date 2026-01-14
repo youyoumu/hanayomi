@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_valid::Validate;
-use std::collections::HashMap;
+use std::{collections::HashMap, fs};
 
 pub type DictionaryTermBankV3 = Vec<DictionaryTermBankV3Row>;
 
@@ -584,3 +584,6 @@ fn test_structured_content_object(obj: &StructuredContentObject) {
         }
     }
 }
+
+#[cfg(test)]
+mod test;

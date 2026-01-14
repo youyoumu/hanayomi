@@ -81,19 +81,153 @@
             "data": {
               "content": "sense-group"
             }
-          },
+          }
+        ]
+      }
+    ],
+    1000600,
+    ""
+  ],
+  ["いい加減にしなさい", "いいかげんにしなさい", "", "", 0, [], 1000600, ""],
+  ["いい加減にしなさい", "いいかげんにしなさい", null, "", 0, [], 1000600, ""],
+  ["いい加減にしなさい", "いいかげんにしなさい", null, "", 0, [], 1000600, 0],
+  [
+    "いい加減にしなさい",
+    "いいかげんにしなさい",
+    null,
+    "",
+    0,
+    ["text term"],
+    1000600,
+    ""
+  ],
+  [
+    "いい加減にしなさい",
+    "いいかげんにしなさい",
+    null,
+    "",
+    0,
+    [["deflection", ["deflection, deflection"]]],
+    1000600,
+    ""
+  ],
+  [
+    "いい加減にしなさい",
+    "いいかげんにしなさい",
+    null,
+    "",
+    0,
+    [["deflection", "invalid"]],
+    1000600,
+    ""
+  ],
+  [
+    "いい加減にしなさい",
+    "いいかげんにしなさい",
+    "",
+    "",
+    0,
+    [
+      {
+        "type": "text",
+        "text": "text term"
+      }
+    ],
+    1000600,
+    ""
+  ],
+  [
+    "いい加減にしなさい",
+    "いいかげんにしなさい",
+    "",
+    "",
+    0,
+    [
+      {
+        "type": "structured-content",
+        "text": "text term"
+      }
+    ],
+    1000600,
+    ""
+  ],
+  [
+    "いい加減にしなさい",
+    "いいかげんにしなさい",
+    "",
+    "",
+    0,
+    [
+      {
+        "type": "structured-content",
+        "content": "text term"
+      }
+    ],
+    1000600,
+    ""
+  ],
+  [
+    "いい加減にしなさい",
+    "いいかげんにしなさい",
+    "",
+    "",
+    0,
+    [
+      {
+        "type": "structured-content",
+        "content": [
           {
-            "tag": "div",
+            "tag": "img",
             "data": {
-              "content": "attribution"
-            },
-            "content": {
-              "tag": "a",
-              "href": "https://www.edrdg.org/jmwsgi/entr.py?svc=jmdict&q=1000600",
-              "content": "JMdict"
+              "content": "sense-group"
             }
           }
         ]
+      }
+    ],
+    1000600,
+    ""
+  ],
+  [
+    "いい加減にしなさい",
+    "いいかげんにしなさい",
+    "",
+    "",
+    0,
+    [
+      {
+        "type": "structured-content",
+        "content": [
+          {
+            "tag": "img",
+            "data": {
+              "content": "sense-group"
+            },
+            "path": "https://www.edrdg.org/jmdict/img/img1.png"
+          }
+        ]
+      }
+    ],
+    1000600,
+    ""
+  ],
+  [
+    "いい加減にしなさい",
+    "いいかげんにしなさい",
+    "",
+    "",
+    0,
+    [
+      {
+        "type": "structured-content",
+        "content": {
+          "tag": "img",
+          "data": {
+            "content": "sense-group"
+          },
+          "path": "htt://www.edrdg.org/jmdict/img/img1.png",
+          "width": -1
+        }
       }
     ],
     1000600,
