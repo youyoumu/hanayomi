@@ -1,5 +1,6 @@
 mod cli;
 mod routes;
+mod schemas;
 mod server;
 mod util;
 
