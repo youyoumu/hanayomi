@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 use serde_valid::Validate;
+use std::collections::HashMap;
 
 pub type DictionaryTermBankV3 = Vec<DictionaryTermBankV3Row>;
 
@@ -56,7 +55,7 @@ struct Deinflection(
 /// A single inflection rule.
 type InflectedTerm = String;
 
-#[derive(Deserialize, Serialize, Debug, Validate)]
+#[derive(Deserialize, Serialize, Debug)]
 struct TextDefinition {
     /// Single definition for the term.
     text: String,
@@ -106,7 +105,7 @@ struct ImageDefinition {
     collapsible: bool,
 }
 
-#[derive(Deserialize, Serialize, Debug, Validate)]
+#[derive(Deserialize, Serialize, Debug)]
 struct StructuredContentDefinition {
     /// Single definition for the term using a structured content object.
     content: Box<StructuredContent>,
@@ -122,149 +121,193 @@ enum StructuredContent {
     Object(Box<StructuredContentObject>),
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(tag = "tag", rename_all = "lowercase")]
+pub enum StructuredContentObject {
+    Br(BreakFields),
+
+    Ruby(ContainerFields),
+    Rt(ContainerFields),
+    Rp(ContainerFields),
+    Table(ContainerFields),
+    Thead(ContainerFields),
+    Tbody(ContainerFields),
+    Tfoot(ContainerFields),
+    Tr(ContainerFields),
+
+    Td(TableElementFields),
+    Th(TableElementFields),
+
+    Span(StyledContainerFields),
+    Div(StyledContainerFields),
+    Ol(StyledContainerFields),
+    Ul(StyledContainerFields),
+    Li(StyledContainerFields),
+    Details(StyledContainerFields),
+    Summary(StyledContainerFields),
+
+    Img(ImageFields),
+
+    A(LinkFields),
+}
+
+impl StructuredContentObject {
+    /// Returns the tag name associated with this variant.
+    pub fn _tag(&self) -> &'static str {
+        match self {
+            Self::Br(_) => "br",
+            Self::Ruby(_) => "ruby",
+            Self::Rt(_) => "rt",
+            Self::Rp(_) => "rp",
+            Self::Table(_) => "table",
+            Self::Thead(_) => "thead",
+            Self::Tbody(_) => "tbody",
+            Self::Tfoot(_) => "tfoot",
+            Self::Tr(_) => "tr",
+            Self::Td(_) => "td",
+            Self::Th(_) => "th",
+            Self::Span(_) => "span",
+            Self::Div(_) => "div",
+            Self::Ol(_) => "ol",
+            Self::Ul(_) => "ul",
+            Self::Li(_) => "li",
+            Self::Details(_) => "details",
+            Self::Summary(_) => "summary",
+            Self::Img(_) => "img",
+            Self::A(_) => "a",
+        }
+    }
+}
+
+// --- Data Structures for the Variants ---
+
+/// Empty tags.
 #[derive(Deserialize, Serialize, Debug, Validate)]
-#[serde(tag = "tag")] // This is the key change to make variants depend on the "tag" value
-enum StructuredContentObject {
-    /// Empty tags.
-    #[serde(rename = "br")]
-    Break {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        data: Option<StructuredContentData>,
-    },
-    /// Generic container tags.
-    #[serde(
-        alias = "ruby",
-        alias = "rt",
-        alias = "rp",
-        alias = "table",
-        alias = "thead",
-        alias = "tbody",
-        alias = "tfoot",
-        alias = "tr"
-    )]
-    Container {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        content: Option<StructuredContent>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        data: Option<StructuredContentData>,
-        /// Defines the language of an element in the format defined by RFC 5646.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        lang: Option<String>,
-    },
-    /// Table tags.
-    #[serde(rename_all = "camelCase")]
-    #[serde(alias = "td", alias = "th")]
-    TableElement {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        content: Option<StructuredContent>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        data: Option<StructuredContentData>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[validate(minimum = 1)]
-        col_span: Option<i32>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[validate(minimum = 1)]
-        row_span: Option<i32>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        style: Option<StructuredContentStyle>,
-        /// Defines the language of an element in the format defined by RFC 5646.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        lang: Option<String>,
-    },
-    /// Container tags supporting configurable styles.
-    #[serde(
-        alias = "span",
-        alias = "div",
-        alias = "ol",
-        alias = "ul",
-        alias = "li",
-        alias = "details",
-        alias = "summary"
-    )]
-    StyledContainer {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        content: Option<StructuredContent>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        data: Option<StructuredContentData>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        style: Option<StructuredContentStyle>,
-        /// Hover text for the element.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        title: Option<String>,
-        /// Whether or not the details element is open by default.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        open: Option<bool>,
-        /// Defines the language of an element in the format defined by RFC 5646.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        lang: Option<String>,
-    },
-    /// Image tag.
-    #[serde(rename = "img")]
-    #[serde(rename_all = "camelCase")]
-    Image {
-        /// Path to the image file in the archive.
-        path: String,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        data: Option<Box<StructuredContentData>>,
-        /// Preferred width of the image.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[validate(minimum = 0.0)]
-        width: Option<f32>,
-        /// Preferred height of the image.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[validate(minimum = 0.0)]
-        height: Option<f32>,
-        /// Hover text for the image.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        title: Option<String>,
-        /// Alt text for the image.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        alt: Option<String>,
-        /// Description of the image.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        description: Option<String>,
-        /// Whether or not the image should appear pixelated at sizes larger than the image's native resolution.
-        #[serde(default)]
-        pixelated: bool,
-        /// Controls how the image is rendered. The value of this field supersedes the pixelated field.
-        #[serde(default = "default_auto")]
-        image_rendering: String,
-        /// Controls the appearance of the image. The "monochrome" value will mask the opaque parts of the image using the current text color.
-        #[serde(default = "default_auto")]
-        appearance: String,
-        /// Whether or not a background color is displayed behind the image.
-        #[serde(default = "default_true")]
-        background: bool,
-        /// Whether or not the image is collapsed by default.
-        #[serde(default)]
-        collapsed: bool,
-        /// Whether or not the image can be collapsed.
-        #[serde(default)]
-        collapsible: bool,
-        /// The vertical alignment of the image.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        vertical_align: Option<String>,
-        /// Shorthand for border width, style, and color.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        border: Option<String>,
-        /// Roundness of the corners of the image's outer border edge.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        border_radius: Option<String>,
-        /// The units for the width and height.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        size_units: Option<String>,
-    },
-    /// Link tag.
-    #[serde(rename = "a")]
-    Link {
-        #[validate(pattern = r"^(?:https?:|\?)[\w\W]*")]
-        href: String,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        content: Option<StructuredContent>,
-        /// Defines the language of an element in the format defined by RFC 5646.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        lang: Option<String>,
-    },
+pub struct BreakFields {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    data: Option<StructuredContentData>,
+}
+
+/// Generic container tags.
+#[derive(Deserialize, Serialize, Debug, Validate)]
+pub struct ContainerFields {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    content: Option<StructuredContent>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    data: Option<StructuredContentData>,
+    /// Defines the language of an element in the format defined by RFC 5646.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    lang: Option<String>,
+}
+
+/// Table tags.
+#[derive(Deserialize, Serialize, Debug, Validate)]
+#[serde(rename_all = "camelCase")]
+pub struct TableElementFields {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    content: Option<StructuredContent>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    data: Option<StructuredContentData>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[validate(minimum = 1)]
+    col_span: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[validate(minimum = 1)]
+    row_span: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    style: Option<StructuredContentStyle>,
+    /// Defines the language of an element in the format defined by RFC 5646.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    lang: Option<String>,
+}
+
+/// Container tags supporting configurable styles.
+#[derive(Deserialize, Serialize, Debug, Validate)]
+pub struct StyledContainerFields {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    content: Option<StructuredContent>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    data: Option<StructuredContentData>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    style: Option<StructuredContentStyle>,
+    /// Hover text for the element.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    title: Option<String>,
+    /// Whether or not the details element is open by default.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    open: Option<bool>,
+    /// Defines the language of an element in the format defined by RFC 5646.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    lang: Option<String>,
+}
+
+/// Image tag.
+#[derive(Deserialize, Serialize, Debug, Validate)]
+#[serde(rename_all = "camelCase")]
+pub struct ImageFields {
+    /// Path to the image file in the archive.
+    path: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    data: Option<Box<StructuredContentData>>,
+    /// Preferred width of the image.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[validate(minimum = 0.0)]
+    width: Option<f32>,
+    /// Preferred height of the image.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[validate(minimum = 0.0)]
+    height: Option<f32>,
+    /// Hover text for the image.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    title: Option<String>,
+    /// Alt text for the image.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    alt: Option<String>,
+    /// Description of the image.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    description: Option<String>,
+    /// Whether or not the image should appear pixelated at sizes larger than the image's native resolution.
+    #[serde(default)]
+    pixelated: bool,
+    /// Controls how the image is rendered. The value of this field supersedes the pixelated field.
+    #[serde(default = "default_auto")]
+    image_rendering: String,
+    /// Controls the appearance of the image. The "monochrome" value will mask the opaque parts of the image using the current text color.
+    #[serde(default = "default_auto")]
+    appearance: String,
+    /// Whether or not a background color is displayed behind the image.
+    #[serde(default = "default_true")]
+    background: bool,
+    /// Whether or not the image is collapsed by default.
+    #[serde(default)]
+    collapsed: bool,
+    /// Whether or not the image can be collapsed.
+    #[serde(default)]
+    collapsible: bool,
+    /// The vertical alignment of the image.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    vertical_align: Option<String>,
+    /// Shorthand for border width, style, and color.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    border: Option<String>,
+    /// Roundness of the corners of the image's outer border edge.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    border_radius: Option<String>,
+    /// The units for the width and height.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    size_units: Option<String>,
+}
+
+/// Link tag.
+#[derive(Deserialize, Serialize, Debug, Validate)]
+pub struct LinkFields {
+    #[validate(pattern = r"^(?:https?:|\?)[\w\W]*")]
+    href: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    content: Option<StructuredContent>,
+    /// Defines the language of an element in the format defined by RFC 5646.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    lang: Option<String>,
 }
 
 /// Generic data attributes that should be added to the element.
@@ -450,7 +493,6 @@ impl DictionaryTermBankV3Row {
                 println!("DEBUG[1410]: this is Array");
             }
         }
-        // println!("DEBUG[1410]: self={:#?}", item);
     }
 }
 
@@ -466,33 +508,6 @@ fn test_structured_content(content: &StructuredContent) {
             }
         }
         StructuredContent::Object(obj) => {
-            // match obj.as_ref() {
-            // StructuredContentObject::Break { tag, .. } => {
-            //     println!("DEBUG[1410]: this is StructuredContentBreak {tag}");
-            // }
-            // StructuredContentObject::Container { tag, .. } => {
-            //     println!(
-            //         "DEBUG[1410]: this is StructuredContentContainer {tag}"
-            //     );
-            // }
-            // StructuredContentObject::TableElement { tag, .. } => {
-            //     println!(
-            //         "DEBUG[1410]: this is StructuredContentTableElement {tag}"
-            //     );
-            // }
-            // StructuredContentObject::StyledContainer { tag, .. } => {
-            //     println!(
-            //         "DEBUG[1410]: this is StructuredContentStyledContainer {tag}"
-            //     );
-            // }
-            // StructuredContentObject::Image { tag, .. } => {
-            //     println!("DEBUG[1410]: this is StructuredContentImage {tag}");
-            // }
-            // StructuredContentObject::Link { tag, .. } => {
-            //     println!("DEBUG[1410]: this is StructuredContentLink {tag}");
-            // }
-            // }
-
             test_structured_content_object(obj);
             // println!("DEBUG[1410]: this is StructuredContentObject");
         }
@@ -501,26 +516,71 @@ fn test_structured_content(content: &StructuredContent) {
 
 fn test_structured_content_object(obj: &StructuredContentObject) {
     match obj {
-        StructuredContentObject::Break { .. } => {
-            println!("DEBUG[1410]: this is StructuredContentBreak ");
+        StructuredContentObject::Br(_) => {
+            println!("DEBUG[1410]: this is StructuredContentBr ");
         }
-        StructuredContentObject::Container { .. } => {
-            // println!("DEBUG[1410]: this is StructuredContentContainer ");
+        StructuredContentObject::Ruby(_) => {
+            println!("DEBUG[1410]: this is StructuredContentRuby ");
         }
-        StructuredContentObject::TableElement { .. } => {
-            println!("DEBUG[1410]: this is StructuredContentTableElement ");
+        StructuredContentObject::Rt(_) => {
+            println!("DEBUG[1410]: this is StructuredContentRt ");
         }
-        StructuredContentObject::StyledContainer { content, .. } => {
-            // println!("DEBUG[1410]: this is StructuredContentStyledContainer ");
-            if let Some(content) = content {
-                test_structured_content(content);
+        StructuredContentObject::Rp(_) => {
+            println!("DEBUG[1410]: this is StructuredContentRp ");
+        }
+        StructuredContentObject::Table(_) => {
+            println!("DEBUG[1410]: this is StructuredContentTable ");
+        }
+        StructuredContentObject::Thead(_) => {
+            println!("DEBUG[1410]: this is StructuredContentThead ");
+        }
+        StructuredContentObject::Tbody(_) => {
+            println!("DEBUG[1410]: this is StructuredContentTbody ");
+        }
+        StructuredContentObject::Tfoot(_) => {
+            println!("DEBUG[1410]: this is StructuredContentTfoot ");
+        }
+        StructuredContentObject::Tr(_) => {
+            println!("DEBUG[1410]: this is StructuredContentTr ");
+        }
+        StructuredContentObject::Td(_) => {
+            println!("DEBUG[1410]: this is StructuredContentTd ");
+        }
+        StructuredContentObject::Th(_) => {
+            println!("DEBUG[1410]: this is StructuredContentTh ");
+        }
+        StructuredContentObject::Span(fields) => {
+            println!("DEBUG[1410]: this is StructuredContentSpan ");
+            if let Some(content) = fields.content.as_ref() {
+                test_structured_content(content)
             }
         }
-        StructuredContentObject::Image { .. } => {
-            println!("DEBUG[1410]: this is StructuredContentImage ");
+        StructuredContentObject::Div(fields) => {
+            if let Some(content) = fields.content.as_ref() {
+                test_structured_content(content)
+            }
+            println!("DEBUG[1410]: this is StructuredContentDiv");
         }
-        StructuredContentObject::Link { .. } => {
-            // println!("DEBUG[1410]: this is StructuredContentLink ");
+        StructuredContentObject::Ol(_) => {
+            println!("DEBUG[1410]: this is StructuredContentOl ");
+        }
+        StructuredContentObject::Ul(_) => {
+            println!("DEBUG[1410]: this is StructuredContentUl ");
+        }
+        StructuredContentObject::Li(_) => {
+            println!("DEBUG[1410]: this is StructuredContentLi ");
+        }
+        StructuredContentObject::Details(_) => {
+            println!("DEBUG[1410]: this is StructuredContentDetails ");
+        }
+        StructuredContentObject::Summary(_) => {
+            println!("DEBUG[1410]: this is StructuredContentSummary ");
+        }
+        StructuredContentObject::Img(_) => {
+            println!("DEBUG[1410]: this is StructuredContentImg ");
+        }
+        StructuredContentObject::A(_) => {
+            println!("DEBUG[1410]: this is StructuredContentA ");
         }
     }
 }

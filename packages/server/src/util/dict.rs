@@ -29,17 +29,10 @@ pub fn parse_dict(workdir: Option<String>, dict: String) -> anyhow::Result<()> {
     let mut dict_archive = ZipArchive::new(dict_file)?;
     // dict_archive.extract(&dict_extract_path)?;
 
-    let term_bank_1 = fs::read_to_string(dict_extract_path.join("term_bank_1.json"))?;
-    let terms: serde_json::Value = serde_json::from_str(&term_bank_1)?;
-    let terms = terms.as_array().unwrap();
-    let term1 = terms.get(100);
-    println!("DEBUG[1410]: term1={:#?}", term1);
-    let term1 = json!([term1]).to_string();
-
-    let a: DictionaryTermBankV3 = serde_json::from_str(&term1)?;
-    if let Some(term1) = a.first() {
-        term1.test();
-        // println!("DEBUG[1410]: term1={:#?}", term1);
+    let term_bank_1 = fs::read_to_string(dict_extract_path.join("term_bank_1_temp.json"))?;
+    let terms: DictionaryTermBankV3 = serde_json::from_str(&term_bank_1)?;
+    for term in terms.iter() {
+        term.test();
     }
 
     eprintln!("DEBUG[1410]: workdir={:#?}", workdir);
