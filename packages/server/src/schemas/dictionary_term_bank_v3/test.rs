@@ -126,7 +126,8 @@ fn should_parse_term_bank_13() {
         && let StructuredContentObject::Img(img) = obj.as_ref()
     {
         println!("{}", serde_json::to_string(&first).unwrap());
-        println!("{}", img.path);
+        println!("path: {}", img.path);
+        println!("width: {}", img.width.unwrap());
     } else {
         panic!("Failed to parse term");
     }

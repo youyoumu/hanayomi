@@ -271,9 +271,11 @@ pub struct ImageFields {
     pixelated: bool,
     /// Controls how the image is rendered. The value of this field supersedes the pixelated field.
     #[serde(default = "default_auto")]
+    #[validate(enumerate = ["auto", "pixelated", "crisp-edges"])]
     image_rendering: String,
     /// Controls the appearance of the image. The "monochrome" value will mask the opaque parts of the image using the current text color.
     #[serde(default = "default_auto")]
+    #[validate(enumerate = ["auto", "monochrome"])]
     appearance: String,
     /// Whether or not a background color is displayed behind the image.
     #[serde(default = "default_true")]
@@ -286,6 +288,7 @@ pub struct ImageFields {
     collapsible: bool,
     /// The vertical alignment of the image.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[validate(enumerate = ["baseline", "sub", "super", "text-top", "text-bottom", "middle", "top", "bottom"])]
     vertical_align: Option<String>,
     /// Shorthand for border width, style, and color.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -295,6 +298,7 @@ pub struct ImageFields {
     border_radius: Option<String>,
     /// The units for the width and height.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[validate(enumerate = ["px", "em"])]
     size_units: Option<String>,
 }
 
