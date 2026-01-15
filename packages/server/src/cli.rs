@@ -1,5 +1,5 @@
-use crate::server::serve;
 use crate::util::dict::parse_dict;
+use crate::{server::serve, util::config::init_config};
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
@@ -20,6 +20,9 @@ enum Commands {
 
         #[arg(long, default_value = "127.0.0.1")]
         host: String,
+
+        #[arg(long)]
+        workdir: Option<String>,
     },
 
     #[command(about = "Manage the dictionary")]
@@ -41,21 +44,33 @@ enum DictCommands {
     },
 
     #[command(about = "Check the dictionary")]
-    Check,
+    Check {
+        #[arg(long)]
+        workdir: Option<String>,
+    },
 }
 
 pub async fn cli() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Serve { port, host } => serve(host, port).await?,
+        Commands::Serve {
+            port,
+            host,
+            workdir,
+        } => {
+            init_config(workdir)?;
+            serve(host, port).await?
+        }
         Commands::Dict { action } => match action {
             DictCommands::Parse { workdir, dict } => {
                 println!("Parsing dictionary...");
-                parse_dict(workdir, dict)?;
+                init_config(workdir.clone())?;
+                parse_dict(dict)?;
             }
-            DictCommands::Check => {
+            DictCommands::Check { workdir } => {
                 println!("Checking dictionary...");
+                init_config(workdir)?;
             }
         },
     };
