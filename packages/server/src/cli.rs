@@ -1,3 +1,4 @@
+use crate::db::init_db;
 use crate::util::dict::parse_dict;
 use crate::{server::serve, util::config::init_config};
 use clap::{Parser, Subcommand};
@@ -66,6 +67,7 @@ pub async fn cli() -> anyhow::Result<()> {
             DictCommands::Parse { workdir, dict } => {
                 println!("Parsing dictionary...");
                 init_config(workdir.clone())?;
+                init_db().await?;
                 parse_dict(dict)?;
             }
             DictCommands::Check { workdir } => {

@@ -29,6 +29,6 @@ fn extract_dict(dict: String) -> anyhow::Result<PathBuf> {
 
     let dict_file = fs::File::open(&dict)?;
     let mut dict_archive = ZipArchive::new(&dict_file)?;
-    dict_archive.extract(&dict_extract_path)?;
+    // dict_archive.extract(&dict_extract_path)?;
     Ok(dict_extract_path)
 }
