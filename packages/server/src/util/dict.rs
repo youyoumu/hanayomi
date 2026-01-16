@@ -15,8 +15,8 @@ impl<'a> Dict<'a> {
         Self { config }
     }
 
-    pub fn parse_dict(&self, dict: String) -> anyhow::Result<()> {
-        let dict_extract_path = Self::extract_dict(&self, dict)?;
+    pub fn parse_dict(&self, dictionary: String) -> anyhow::Result<()> {
+        let dict_extract_path = Self::extract_dict(self, dictionary)?;
 
         let term_bank_1 = fs::read_to_string(dict_extract_path.join("term_bank_1.json"))?;
         let terms: DictionaryTermBankV3 = serde_json::from_str(&term_bank_1)?;

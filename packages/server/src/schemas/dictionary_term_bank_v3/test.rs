@@ -7,7 +7,7 @@ fn get_term_bank() -> Vec<Value> {
     let data = fs::read_to_string("src/fixtures/term_bank.json").unwrap();
     let term_bank: Value = serde_json::from_str(&data).unwrap();
     let term_bank = term_bank.as_array().unwrap();
-    term_bank.clone()
+    term_bank.to_vec()
 }
 
 #[test]

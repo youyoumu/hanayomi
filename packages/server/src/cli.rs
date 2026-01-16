@@ -42,7 +42,7 @@ enum DictCommands {
         workdir: Option<String>,
 
         #[arg(long)]
-        dict: String,
+        dictionary: String,
     },
 
     #[command(about = "Check the dictionary")]
@@ -65,12 +65,15 @@ pub async fn cli() -> anyhow::Result<()> {
             serve(host, port).await?
         }
         Commands::Dict { action } => match action {
-            DictCommands::Parse { workdir, dict } => {
+            DictCommands::Parse {
+                workdir,
+                dictionary,
+            } => {
                 println!("Parsing dictionary...");
                 let config = Config::new(workdir)?;
-                let dict_ = Dict::new(&config);
+                let dict = Dict::new(&config);
                 let db = Db::new(&config);
-                dict_.parse_dict(dict)?;
+                dict.parse_dict(dictionary)?;
                 db.init_db().await?;
             }
             DictCommands::Check { workdir } => {
