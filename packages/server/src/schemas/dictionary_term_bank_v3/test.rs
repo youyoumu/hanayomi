@@ -110,7 +110,7 @@ fn should_parse_term_bank_13() {
     let first = result.first().unwrap();
     let definition = first.5.first().unwrap();
 
-    if let Term::DetailedDefinition(definition) = definition
+    if let Definition::Detailed(definition) = definition
         && let DetailedDefinition::StructuredContent(sc) = definition.as_ref()
         && let StructuredContent::Object(obj) = sc.content.as_ref()
         && let StructuredContentObject::Img(img) = obj.as_ref()
@@ -131,7 +131,7 @@ fn should_parse_term_bank_14() {
     let first = result.first().unwrap();
     let definition = first.5.first().unwrap();
 
-    if let Term::DetailedDefinition(definition) = definition
+    if let Definition::Detailed(definition) = definition
         && let DetailedDefinition::StructuredContent(sc) = definition.as_ref()
         && let StructuredContent::Object(obj) = sc.content.as_ref()
         && let StructuredContentObject::Img(img) = obj.as_ref()

@@ -4,10 +4,10 @@ impl DictionaryTermBankV3Row {
     pub fn test(&self) {
         let item = self.5.first().unwrap();
         match item {
-            Term::Definition(_) => {
+            Definition::Text(_) => {
                 println!("DEBUG[1410]: this is String");
             }
-            Term::DetailedDefinition(definition) => match definition.as_ref() {
+            Definition::Detailed(definition) => match definition.as_ref() {
                 DetailedDefinition::Text(_) => {
                     println!("DEBUG[1410]: this is Text");
                 }
@@ -19,7 +19,7 @@ impl DictionaryTermBankV3Row {
                     // println!("DEBUG[1410]: this is StructuredContent");
                 }
             },
-            Term::Deinflection(_) => {
+            Definition::Deinflection(_) => {
                 println!("DEBUG[1410]: this is Array");
             }
         }

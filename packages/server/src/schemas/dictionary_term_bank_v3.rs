@@ -8,112 +8,112 @@ pub type DictionaryTermBankV3 = Vec<DictionaryTermBankV3Row>;
 /// Information about a single term.
 pub struct DictionaryTermBankV3Row(
     /// The text for the term.
-    String,
+    pub String,
     /// Reading of the term, or an empty string if the reading is the same as the term.
-    String,
+    pub String,
     /// String of space-separated tags for the definition. An empty string is treated as no tags.
-    Option<String>,
+    pub Option<String>,
     /// String of space-separated rule identifiers for the definition which is used to validate deinflection. An empty string should be used for words which aren't inflected.
-    String,
+    pub String,
     /// Score used to determine popularity. Negative values are more rare and positive values are more frequent. This score is also used to sort search results.
-    f32,
+    pub f32,
     /// Array of definitions for the term.
-    Vec<Term>,
+    pub Vec<Definition>,
     /// Sequence number for the term. Terms with the same sequence number can be shown together when the "resultOutputMode" option is set to "merge".
-    i32,
+    pub i32,
     /// String of space-separated tags for the term. An empty string is treated as no tags.
-    String,
+    pub String,
 );
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(untagged)]
-enum Term {
+pub enum Definition {
     /// Single definition for the term.
-    Definition(String),
+    Text(String),
     /// Single detailed definition for the term.
-    DetailedDefinition(Box<DetailedDefinition>),
+    Detailed(Box<DetailedDefinition>),
     /// Deinflection of the term to an uninflected term.
     Deinflection(Deinflection),
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(tag = "type", rename_all = "kebab-case")]
-enum DetailedDefinition {
+pub enum DetailedDefinition {
     Text(TextDefinition),
     Image(ImageDefinition),
     StructuredContent(StructuredContentDefinition),
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-struct Deinflection(
+pub struct Deinflection(
     /// The uninflected term.
-    String,
+    pub String,
     /// A chain of inflection rules that produced the inflected term
-    Vec<InflectedTerm>,
+    pub Vec<InflectedTerm>,
 );
 
 /// A single inflection rule.
-type InflectedTerm = String;
+pub type InflectedTerm = String;
 
 #[derive(Deserialize, Serialize, Debug)]
-struct TextDefinition {
+pub struct TextDefinition {
     /// Single definition for the term.
     text: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, Validate)]
 #[serde(rename_all = "camelCase")]
-struct ImageDefinition {
+pub struct ImageDefinition {
     /// Path to the image file in the archive.
-    path: String,
+    pub path: String,
     /// Preferred width of the image.
     #[validate(minimum = 1)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    width: Option<i32>,
+    pub width: Option<i32>,
     /// Preferred height of the image.
     #[validate(minimum = 1)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    height: Option<i32>,
+    pub height: Option<i32>,
     /// Hover text for the image.
     #[serde(skip_serializing_if = "Option::is_none")]
-    title: Option<String>,
+    pub title: Option<String>,
     /// Alt text for the image.
     #[serde(skip_serializing_if = "Option::is_none")]
-    alt: Option<String>,
+    pub alt: Option<String>,
     /// Description of the image.
     #[serde(skip_serializing_if = "Option::is_none")]
-    description: Option<String>,
+    pub description: Option<String>,
     /// Whether or not the image should appear pixelated at sizes larger than the image's native resolution.
     #[serde(default)]
-    pixelated: bool,
+    pub pixelated: bool,
     /// Controls how the image is rendered. The value of this field supersedes the pixelated field.
     #[validate(enumerate = ["auto", "pixelated", "crisp-edges"])]
     #[serde(default = "default_auto")]
-    image_rendering: String,
+    pub image_rendering: String,
     /// Controls the appearance of the image. The "monochrome" value will mask the opaque parts of the image using the current text color.
     #[validate(enumerate = ["auto", "monochrome"])]
     #[serde(default = "default_auto")]
-    appearance: String,
+    pub appearance: String,
     /// Whether or not a background color is displayed behind the image.
     #[serde(default = "default_true")]
-    background: bool,
+    pub background: bool,
     /// Whether or not the image is collapsed by default.
     #[serde(default)]
-    collapsed: bool,
+    pub collapsed: bool,
     /// Whether or not the image can be collapsed.
     #[serde(default = "default_true")]
-    collapsible: bool,
+    pub collapsible: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-struct StructuredContentDefinition {
+pub struct StructuredContentDefinition {
     /// Single definition for the term using a structured content object.
-    content: Box<StructuredContent>,
+    pub content: Box<StructuredContent>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(untagged)]
-enum StructuredContent {
+pub enum StructuredContent {
     /// Represents a text node.
     Text(String),
     /// An array of child content.
@@ -185,19 +185,19 @@ impl StructuredContentObject {
 #[derive(Deserialize, Serialize, Debug, Validate)]
 pub struct BreakFields {
     #[serde(skip_serializing_if = "Option::is_none")]
-    data: Option<StructuredContentData>,
+    pub data: Option<StructuredContentData>,
 }
 
 /// Generic container tags.
 #[derive(Deserialize, Serialize, Debug, Validate)]
 pub struct ContainerFields {
     #[serde(skip_serializing_if = "Option::is_none")]
-    content: Option<StructuredContent>,
+    pub content: Option<StructuredContent>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    data: Option<StructuredContentData>,
+    pub data: Option<StructuredContentData>,
     /// Defines the language of an element in the format defined by RFC 5646.
     #[serde(skip_serializing_if = "Option::is_none")]
-    lang: Option<String>,
+    pub lang: Option<String>,
 }
 
 /// Table tags.
@@ -205,40 +205,40 @@ pub struct ContainerFields {
 #[serde(rename_all = "camelCase")]
 pub struct TableElementFields {
     #[serde(skip_serializing_if = "Option::is_none")]
-    content: Option<StructuredContent>,
+    pub content: Option<StructuredContent>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    data: Option<StructuredContentData>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[validate(minimum = 1)]
-    col_span: Option<i32>,
+    pub data: Option<StructuredContentData>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[validate(minimum = 1)]
-    row_span: Option<i32>,
+    pub col_span: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    style: Option<StructuredContentStyle>,
+    #[validate(minimum = 1)]
+    pub row_span: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub style: Option<StructuredContentStyle>,
     /// Defines the language of an element in the format defined by RFC 5646.
     #[serde(skip_serializing_if = "Option::is_none")]
-    lang: Option<String>,
+    pub lang: Option<String>,
 }
 
 /// Container tags supporting configurable styles.
 #[derive(Deserialize, Serialize, Debug, Validate)]
 pub struct StyledContainerFields {
     #[serde(skip_serializing_if = "Option::is_none")]
-    content: Option<StructuredContent>,
+    pub content: Option<StructuredContent>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    data: Option<StructuredContentData>,
+    pub data: Option<StructuredContentData>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    style: Option<StructuredContentStyle>,
+    pub style: Option<StructuredContentStyle>,
     /// Hover text for the element.
     #[serde(skip_serializing_if = "Option::is_none")]
-    title: Option<String>,
+    pub title: Option<String>,
     /// Whether or not the details element is open by default.
     #[serde(skip_serializing_if = "Option::is_none")]
-    open: Option<bool>,
+    pub open: Option<bool>,
     /// Defines the language of an element in the format defined by RFC 5646.
     #[serde(skip_serializing_if = "Option::is_none")]
-    lang: Option<String>,
+    pub lang: Option<String>,
 }
 
 /// Image tag.
@@ -246,72 +246,72 @@ pub struct StyledContainerFields {
 #[serde(rename_all = "camelCase")]
 pub struct ImageFields {
     /// Path to the image file in the archive.
-    path: String,
+    pub path: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    data: Option<Box<StructuredContentData>>,
+    pub data: Option<Box<StructuredContentData>>,
     /// Preferred width of the image.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[validate(minimum = 0.0)]
-    width: Option<f32>,
+    pub width: Option<f32>,
     /// Preferred height of the image.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[validate(minimum = 0.0)]
-    height: Option<f32>,
+    pub height: Option<f32>,
     /// Hover text for the image.
     #[serde(skip_serializing_if = "Option::is_none")]
-    title: Option<String>,
+    pub title: Option<String>,
     /// Alt text for the image.
     #[serde(skip_serializing_if = "Option::is_none")]
-    alt: Option<String>,
+    pub alt: Option<String>,
     /// Description of the image.
     #[serde(skip_serializing_if = "Option::is_none")]
-    description: Option<String>,
+    pub description: Option<String>,
     /// Whether or not the image should appear pixelated at sizes larger than the image's native resolution.
     #[serde(default)]
-    pixelated: bool,
+    pub pixelated: bool,
     /// Controls how the image is rendered. The value of this field supersedes the pixelated field.
     #[serde(default = "default_auto")]
     #[validate(enumerate = ["auto", "pixelated", "crisp-edges"])]
-    image_rendering: String,
+    pub image_rendering: String,
     /// Controls the appearance of the image. The "monochrome" value will mask the opaque parts of the image using the current text color.
     #[serde(default = "default_auto")]
     #[validate(enumerate = ["auto", "monochrome"])]
-    appearance: String,
+    pub appearance: String,
     /// Whether or not a background color is displayed behind the image.
     #[serde(default = "default_true")]
-    background: bool,
+    pub background: bool,
     /// Whether or not the image is collapsed by default.
     #[serde(default)]
-    collapsed: bool,
+    pub collapsed: bool,
     /// Whether or not the image can be collapsed.
     #[serde(default)]
-    collapsible: bool,
+    pub collapsible: bool,
     /// The vertical alignment of the image.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[validate(enumerate = ["baseline", "sub", "super", "text-top", "text-bottom", "middle", "top", "bottom"])]
-    vertical_align: Option<String>,
+    pub vertical_align: Option<String>,
     /// Shorthand for border width, style, and color.
     #[serde(skip_serializing_if = "Option::is_none")]
-    border: Option<String>,
+    pub border: Option<String>,
     /// Roundness of the corners of the image's outer border edge.
     #[serde(skip_serializing_if = "Option::is_none")]
-    border_radius: Option<String>,
+    pub border_radius: Option<String>,
     /// The units for the width and height.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[validate(enumerate = ["px", "em"])]
-    size_units: Option<String>,
+    pub size_units: Option<String>,
 }
 
 /// Link tag.
 #[derive(Deserialize, Serialize, Debug, Validate)]
 pub struct LinkFields {
     #[validate(pattern = r"^(?:https?:|\?)[\w\W]*")]
-    href: String,
+    pub href: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    content: Option<StructuredContent>,
+    pub content: Option<StructuredContent>,
     /// Defines the language of an element in the format defined by RFC 5646.
     #[serde(skip_serializing_if = "Option::is_none")]
-    lang: Option<String>,
+    pub lang: Option<String>,
 }
 
 /// Generic data attributes that should be added to the element.
@@ -319,113 +319,113 @@ type StructuredContentData = HashMap<String, String>;
 
 #[derive(Deserialize, Serialize, Debug, Validate)]
 #[serde(rename_all = "camelCase")]
-struct StructuredContentStyle {
+pub struct StructuredContentStyle {
     #[serde(default = "default_normal")]
     #[validate(enumerate = ["normal", "italic"])]
-    font_style: String,
+    pub font_style: String,
 
     #[serde(default = "default_normal")]
     #[validate(enumerate = ["normal", "bold"])]
-    font_weight: String,
+    pub font_weight: String,
 
     #[serde(default = "default_medium")]
-    font_size: String,
+    pub font_size: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    color: Option<String>,
+    pub color: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    background: Option<String>,
+    pub background: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    background_color: Option<String>,
+    pub background_color: Option<String>,
 
     #[serde(default)]
-    text_decoration_line: TextDecorationLine,
+    pub text_decoration_line: TextDecorationLine,
 
     #[serde(default = "default_solid")]
     #[validate(enumerate = ["solid", "double", "dotted", "dashed", "wavy"])]
-    text_decoration_style: String,
+    pub text_decoration_style: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    text_decoration_color: Option<String>,
+    pub text_decoration_color: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    border_color: Option<String>,
+    pub border_color: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    border_style: Option<String>,
+    pub border_style: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    border_radius: Option<String>,
+    pub border_radius: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    border_width: Option<String>,
+    pub border_width: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    clip_path: Option<String>,
+    pub clip_path: Option<String>,
 
     #[serde(default = "default_baseline")]
     #[validate(enumerate = ["baseline", "sub", "super", "text-top", "text-bottom", "middle", "top", "bottom"])]
-    vertical_align: String,
+    pub vertical_align: String,
 
     #[serde(default = "default_start")]
     #[validate(enumerate = ["start", "end", "left", "right", "center", "justify", "justify-all", "match-parent"])]
-    text_align: String,
+    pub text_align: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    text_emphasis: Option<String>,
+    pub text_emphasis: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    text_shadow: Option<String>,
+    pub text_shadow: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    margin: Option<String>,
+    pub margin: Option<String>,
 
     #[serde(default)]
-    margin_top: NumberOrString,
+    pub margin_top: NumberOrString,
 
     #[serde(default)]
-    margin_left: NumberOrString,
+    pub margin_left: NumberOrString,
 
     #[serde(default)]
-    margin_right: NumberOrString,
+    pub margin_right: NumberOrString,
 
     #[serde(default)]
-    margin_bottom: NumberOrString,
+    pub margin_bottom: NumberOrString,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    padding: Option<String>,
+    pub padding: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    padding_top: Option<String>,
+    pub padding_top: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    padding_left: Option<String>,
+    pub padding_left: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    padding_right: Option<String>,
+    pub padding_right: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    padding_bottom: Option<String>,
+    pub padding_bottom: Option<String>,
 
     #[serde(default = "default_normal")]
     #[validate(enumerate = ["normal", "break-all", "keep-all"])]
-    word_break: String,
+    pub word_break: String,
 
     #[serde(default = "default_normal")]
-    white_space: String,
+    pub white_space: String,
 
     #[serde(default = "default_auto")]
-    cursor: String,
+    pub cursor: String,
 
     #[serde(default = "default_disc")]
-    list_style_type: String,
+    pub list_style_type: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(untagged)]
-enum TextDecorationLine {
+pub enum TextDecorationLine {
     Single(String),
     Multiple(Vec<String>),
 }
@@ -438,7 +438,7 @@ impl Default for TextDecorationLine {
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(untagged)]
-enum NumberOrString {
+pub enum NumberOrString {
     Number(f32),
     String(String),
 }
