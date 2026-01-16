@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use serde_valid::Validate;
 use std::collections::HashMap;
 
+// TODO: serde_valie .validate needs to be invoked manually
+
 pub type DictionaryTermBankV3 = Vec<DictionaryTermBankV3Row>;
 
 #[derive(Deserialize, Serialize, Debug)]
