@@ -1,9 +1,12 @@
 use crate::schemas::{dictionary_index::TagMeta, dictionary_term_bank_v3::Definition};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Dictionary {
     pub id: i32,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 
     pub title: String,
     pub revision: String,
@@ -34,27 +37,31 @@ pub struct Dictionary {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct DictionaryEntry {
-    id: i32,
-    dictionary_id: i32,
+    pub id: i32,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub dictionary_id: i32,
 
-    expression: String,
-    reading: String,
-    definitions: Vec<Definition>,
-    rules: String,
-    score: f32,
-    sequence: i32,
-    definition_tags: String,
-    expression_tags: String,
+    pub expression: String,
+    pub reading: String,
+    pub definitions: Vec<Definition>,
+    pub rules: String,
+    pub score: f32,
+    pub sequence: i32,
+    pub definition_tags: String,
+    pub expression_tags: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct DefinitionTag {
-    id: i32,
-    dictionary_id: i32,
+    pub id: i32,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub dictionary_id: i32,
 
-    name: String,
-    category: String,
-    order: f32,
-    notes: String,
-    score: f32,
+    pub name: String,
+    pub category: String,
+    pub order: f32,
+    pub notes: String,
+    pub score: f32,
 }
