@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Dictionary {
     pub id: i32,
+
     pub title: String,
     pub revision: String,
     pub author: Option<String>,
@@ -35,6 +36,7 @@ pub struct Dictionary {
 struct DictionaryEntry {
     id: i32,
     dictionary_id: i32,
+
     expression: String,
     reading: String,
     definitions: Vec<Definition>,
@@ -43,4 +45,16 @@ struct DictionaryEntry {
     sequence: i32,
     definition_tags: String,
     expression_tags: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct DefinitionTag {
+    id: i32,
+    dictionary_id: i32,
+
+    name: String,
+    category: String,
+    order: f32,
+    notes: String,
+    score: f32,
 }
