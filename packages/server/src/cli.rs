@@ -1,6 +1,7 @@
-use crate::db::init_db;
-use crate::util::dict::parse_dict;
-use crate::{server::serve, util::config::init_config};
+use crate::db::Db;
+use crate::server::serve;
+use crate::util::config::Config;
+use crate::util::dict::Dict;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
@@ -60,19 +61,21 @@ pub async fn cli() -> anyhow::Result<()> {
             host,
             workdir,
         } => {
-            init_config(workdir)?;
+            let config = Config::new(workdir)?;
             serve(host, port).await?
         }
         Commands::Dict { action } => match action {
             DictCommands::Parse { workdir, dict } => {
                 println!("Parsing dictionary...");
-                init_config(workdir.clone())?;
-                init_db().await?;
-                parse_dict(dict)?;
+                let config = Config::new(workdir)?;
+                let dict_ = Dict::new(&config);
+                let db = Db::new(&config);
+                dict_.parse_dict(dict)?;
+                db.init_db().await?;
             }
             DictCommands::Check { workdir } => {
                 println!("Checking dictionary...");
-                init_config(workdir)?;
+                let config = Config::new(workdir)?;
             }
         },
     };
