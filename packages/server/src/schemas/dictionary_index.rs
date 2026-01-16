@@ -61,11 +61,13 @@ pub struct DictionaryIndex {
     pub frequency_mode: Option<String>,
     /// Tag information (Obsolete, but included for compatibility).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tag_meta: Option<HashMap<String, TagMeta>>,
+    pub tag_meta: Option<TagMeta>,
 }
 
+pub type TagMeta = HashMap<String, TagMetaValue>;
+
 #[derive(Deserialize, Serialize, Debug, Validate)]
-pub struct TagMeta {
+pub struct TagMetaValue {
     /// Category for the tag.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub category: Option<String>,

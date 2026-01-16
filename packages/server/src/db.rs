@@ -1,6 +1,7 @@
-use sqlx::sqlite::SqlitePool;
+mod tables;
 
 use crate::util::config::Config;
+use sqlx::sqlite::SqlitePool;
 
 pub struct Db<'a> {
     config: &'a Config,
