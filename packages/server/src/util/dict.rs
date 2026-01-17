@@ -4,6 +4,8 @@ use zip::ZipArchive;
 
 use anyhow::{Context, bail};
 
+use crate::schemas::dictionary_index::DictionaryIndex;
+use crate::schemas::dictionary_tag_bank_v3::DictionaryTagBankV3;
 use crate::schemas::dictionary_term_bank_v3::DictionaryTermBankV3;
 use crate::util::config::Config;
 pub struct Dict<'a> {
@@ -16,35 +18,29 @@ impl<'a> Dict<'a> {
     }
 
     pub fn parse_dict(&self, dictionary: String) -> anyhow::Result<()> {
-        let dict_extract_path = Self::extract_dict(self, dictionary)?;
+        let dict_extract_path = self.extract_dict(dictionary)?;
 
-        // 1. Read the directory entries
         let entries =
             fs::read_dir(&dict_extract_path).context("Failed to read dictionary directory")?;
         let entries: Result<Vec<_>, _> = entries.collect();
         let entries = entries?;
-        let all_terms = Self::parse_term_bank(self, entries)?;
+
+        //TODO: optimize memory usage
+        let index = self.parse_index(dict_extract_path.join("index.json"));
+        let all_terms = Self::parse_term_bank(self, &entries)?;
+        let all_tags = Self::parse_tag_bank(self, &entries)?;
 
         Ok(())
     }
 
-    pub fn parse_term_bank(&self, entries: Vec<DirEntry>) -> anyhow::Result<DictionaryTermBankV3> {
-        let entries: Vec<PathBuf> = entries
-            .iter()
-            .filter(|e| {
-                let file_name = e.file_name();
-                let file_name = file_name.to_str();
-                if let Some(file_name) = file_name
-                    && file_name.starts_with("term_bank_")
-                    && file_name.ends_with(".json")
-                {
-                    return true;
-                }
-                false
-            })
-            .map(|e| e.path())
-            .collect();
+    fn parse_index(&self, index: PathBuf) -> anyhow::Result<(DictionaryIndex)> {
+        let content = fs::read_to_string(&index);
+        let index: DictionaryIndex = serde_json::from_str(&content?)?;
+        Ok(index)
+    }
 
+    fn parse_term_bank(&self, entries: &[DirEntry]) -> anyhow::Result<DictionaryTermBankV3> {
+        let entries = self.get_entries(entries, "term_bank_".to_string())?;
         let mut all_terms = Vec::new();
         for entry in entries {
             let content = fs::read_to_string(&entry);
@@ -58,11 +54,47 @@ impl<'a> Dict<'a> {
                 }
             }
         }
-
         Ok(all_terms)
     }
 
-    pub fn extract_dict(&self, dictionary: String) -> anyhow::Result<PathBuf> {
+    fn parse_tag_bank(&self, entries: &[DirEntry]) -> anyhow::Result<DictionaryTagBankV3> {
+        let entries = self.get_entries(entries, "tag_bank_".to_string())?;
+        let mut all_tags = Vec::new();
+        for entry in entries {
+            let content = fs::read_to_string(&entry);
+            match content {
+                Ok(content) => {
+                    let mut terms: DictionaryTagBankV3 = serde_json::from_str(&content)?;
+                    all_tags.append(&mut terms);
+                }
+                Err(e) => {
+                    bail!("Failed to read {}: {}", entry.display(), e)
+                }
+            }
+        }
+        Ok(all_tags)
+    }
+
+    fn get_entries(&self, entries: &[DirEntry], prefix: String) -> anyhow::Result<Vec<PathBuf>> {
+        let entries: Vec<PathBuf> = entries
+            .iter()
+            .filter(|e| {
+                let file_name = e.file_name();
+                let file_name = file_name.to_str();
+                if let Some(file_name) = file_name
+                    && file_name.starts_with(&prefix)
+                    && file_name.ends_with(".json")
+                {
+                    return true;
+                }
+                false
+            })
+            .map(|e| e.path())
+            .collect();
+        Ok(entries)
+    }
+
+    fn extract_dict(&self, dictionary: String) -> anyhow::Result<PathBuf> {
         let dict_file_name = Path::new(&dictionary)
             .file_name()
             .context("Failed to get file name of dict")?;
