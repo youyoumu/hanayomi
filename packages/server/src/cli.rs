@@ -71,10 +71,9 @@ pub async fn cli() -> anyhow::Result<()> {
             } => {
                 println!("Parsing dictionary...");
                 let config = Config::new(workdir)?;
-                let dict = Dict::new(&config);
                 let db = Db::new(&config);
+                let dict = Dict::new(&config);
                 dict.parse_dict(dictionary)?;
-                db.init_db().await?;
             }
             DictCommands::Check { workdir } => {
                 println!("Checking dictionary...");

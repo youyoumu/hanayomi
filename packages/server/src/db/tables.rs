@@ -36,7 +36,7 @@ pub struct Dictionary {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct DictionaryEntry {
+pub struct DictionaryEntry {
     pub id: i32,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -53,7 +53,7 @@ struct DictionaryEntry {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct DefinitionTag {
+pub struct DefinitionTag {
     pub id: i32,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
