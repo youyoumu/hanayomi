@@ -96,4 +96,9 @@ impl<'a> Db<'a> {
         tx.commit().await?;
         Ok(())
     }
+
+    pub async fn _vacuum(&self) -> anyhow::Result<()> {
+        sqlx::query("VACUUM").execute(&self.pool).await?;
+        Ok(())
+    }
 }
