@@ -1,4 +1,5 @@
-use indicatif::{ProgressBar, ProgressStyle};
+use console::style;
+use indicatif::ProgressBar;
 use std::ffi::OsStr;
 use std::fs::{self, DirEntry};
 use std::path::{Path, PathBuf};
@@ -12,7 +13,7 @@ use crate::schemas::dictionary_index::DictionaryIndex;
 use crate::schemas::dictionary_tag_bank_v3::DictionaryTagBankV3;
 use crate::schemas::dictionary_term_bank_v3::DictionaryTermBankV3;
 use crate::util::config::Config;
-use crate::util::progress::{get_progress_bar, get_style};
+use crate::util::progress::get_progress_bar;
 pub struct Dict<'a> {
     pub config: &'a Config,
 }
@@ -23,8 +24,10 @@ impl<'a> Dict<'a> {
     }
 
     pub async fn parse_dict(&self, dictionary: String, db: &Db<'a>) -> anyhow::Result<()> {
+        println!("{} Extracting...", style("[1/3]").bold().dim(),);
         let dict_extract_path = self.extract_dict(dictionary)?;
 
+        println!("{} Parsing...", style("[2/3]").bold().dim());
         let entries =
             fs::read_dir(&dict_extract_path).context("Failed to read dictionary directory")?;
         let entries: Result<Vec<_>, _> = entries.collect();
@@ -34,6 +37,8 @@ impl<'a> Dict<'a> {
         let index = self.parse_index(dict_extract_path.join("index.json"))?;
         let all_terms = Self::parse_term_bank(self, &entries)?;
         let all_tags = Self::parse_tag_bank(self, &entries)?;
+
+        println!("{} Inserting...", style("[3/3]").bold().dim());
         db.insert_dictionary_data(&index, &all_terms, &all_tags)
             .await?;
 
@@ -120,7 +125,7 @@ impl<'a> Dict<'a> {
 
         let pb = ProgressBar::new_spinner();
         pb.enable_steady_tick(Duration::from_millis(100));
-        pb.set_message(format!("Extracting {}", dict_file_name.to_string_lossy()));
+        pb.set_message(format!("{}", dict_file_name.to_string_lossy()));
         dict_archive.extract(&dict_extract_path)?;
         pb.finish_and_clear();
 

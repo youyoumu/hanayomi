@@ -69,7 +69,6 @@ pub async fn cli() -> anyhow::Result<()> {
                 workdir,
                 dictionary,
             } => {
-                println!("Parsing dictionary...");
                 let config = Config::new(workdir)?;
                 let db = Db::new(&config).await?;
                 let dict = Dict::new(&config);
