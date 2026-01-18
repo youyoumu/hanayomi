@@ -47,32 +47,34 @@ impl<'a> Db<'a> {
         let dictionary_id: i32 = row.get(0);
 
         let pb = get_progress_bar(entries.len() as u64);
-        for entry in entries {
-            let expression = &entry.0;
-            pb.set_message(expression.to_string());
-
-            let defs_json = serde_json::to_string(&entry.5)?;
-            sqlx::query(
+        let chunk_size = 100;
+        for chunk in entries.chunks(chunk_size) {
+            let mut query_builder = sqlx::QueryBuilder::new(
                 r#"-- sql
                 INSERT INTO dictionary_entry (
                     dictionary_id, expression, reading, definitions,
                     rules, score, sequence, definition_tags, expression_tags
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                "#,
-            )
-            .bind(dictionary_id)
-            .bind(&entry.0)
-            .bind(&entry.1)
-            .bind(defs_json)
-            .bind(&entry.3)
-            .bind(entry.4)
-            .bind(entry.6)
-            .bind(&entry.2)
-            .bind(&entry.7)
-            .execute(&mut *tx)
-            .await?;
+                )"#,
+            );
 
-            pb.inc(1);
+            query_builder.push_values(chunk, |mut b, entry| {
+                let expression = &entry.0;
+                pb.set_message(expression.to_string());
+                let defs_json = serde_json::to_string(&entry.5).unwrap();
+                b.push_bind(dictionary_id)
+                    .push_bind(&entry.0)
+                    .push_bind(&entry.1)
+                    .push_bind(defs_json)
+                    .push_bind(&entry.3)
+                    .push_bind(entry.4)
+                    .push_bind(entry.6)
+                    .push_bind(&entry.2)
+                    .push_bind(&entry.7);
+            });
+
+            let query = query_builder.build();
+            query.execute(&mut *tx).await?;
+            pb.inc(chunk_size as u64);
         }
         pb.finish_and_clear();
 
