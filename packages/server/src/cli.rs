@@ -61,7 +61,7 @@ pub async fn cli() -> anyhow::Result<()> {
             host,
             workdir,
         } => {
-            let config = Config::new(workdir)?;
+            let _config = Config::new(workdir)?;
             serve(host, port).await?
         }
         Commands::Dict { action } => match action {
@@ -71,13 +71,13 @@ pub async fn cli() -> anyhow::Result<()> {
             } => {
                 println!("Parsing dictionary...");
                 let config = Config::new(workdir)?;
-                let db = Db::new(&config);
+                let db = Db::new(&config).await?;
                 let dict = Dict::new(&config);
-                dict.parse_dict(dictionary)?;
+                dict.parse_dict(dictionary, &db).await?;
             }
             DictCommands::Check { workdir } => {
                 println!("Checking dictionary...");
-                let config = Config::new(workdir)?;
+                let _config = Config::new(workdir)?;
             }
         },
     };

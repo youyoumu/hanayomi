@@ -4,6 +4,7 @@ use zip::ZipArchive;
 
 use anyhow::{Context, bail};
 
+use crate::db::Db;
 use crate::schemas::dictionary_index::DictionaryIndex;
 use crate::schemas::dictionary_tag_bank_v3::DictionaryTagBankV3;
 use crate::schemas::dictionary_term_bank_v3::DictionaryTermBankV3;
@@ -17,7 +18,7 @@ impl<'a> Dict<'a> {
         Self { config }
     }
 
-    pub fn parse_dict(&self, dictionary: String) -> anyhow::Result<()> {
+    pub async fn parse_dict(&self, dictionary: String, db: &Db<'a>) -> anyhow::Result<()> {
         let dict_extract_path = self.extract_dict(dictionary)?;
 
         let entries =
@@ -26,14 +27,16 @@ impl<'a> Dict<'a> {
         let entries = entries?;
 
         //TODO: optimize memory usage
-        let index = self.parse_index(dict_extract_path.join("index.json"));
+        let index = self.parse_index(dict_extract_path.join("index.json"))?;
         let all_terms = Self::parse_term_bank(self, &entries)?;
         let all_tags = Self::parse_tag_bank(self, &entries)?;
+        db.insert_dictionary_data(&index, &all_terms, &all_tags)
+            .await?;
 
         Ok(())
     }
 
-    fn parse_index(&self, index: PathBuf) -> anyhow::Result<(DictionaryIndex)> {
+    fn parse_index(&self, index: PathBuf) -> anyhow::Result<DictionaryIndex> {
         let content = fs::read_to_string(&index);
         let index: DictionaryIndex = serde_json::from_str(&content?)?;
         Ok(index)
