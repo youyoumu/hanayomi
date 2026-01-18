@@ -1,6 +1,7 @@
 use crate::schemas::dictionary_index::DictionaryIndex;
 use crate::schemas::dictionary_tag_bank_v3::DictionaryTagBankV3;
 use crate::schemas::dictionary_term_bank_v3::DictionaryTermBankV3;
+use crate::util::progress::get_progress_bar;
 use sqlx::Row;
 
 use super::*;
@@ -45,7 +46,11 @@ impl<'a> Db<'a> {
         .await?;
         let dictionary_id: i32 = row.get(0);
 
+        let pb = get_progress_bar(entries.len() as u64);
         for entry in entries {
+            let expression = &entry.0;
+            pb.set_message(expression.to_string());
+
             let defs_json = serde_json::to_string(&entry.5)?;
             sqlx::query(
                 r#"-- sql
@@ -66,7 +71,10 @@ impl<'a> Db<'a> {
             .bind(&entry.7)
             .execute(&mut *tx)
             .await?;
+
+            pb.inc(1);
         }
+        pb.finish_and_clear();
 
         for tag in tags {
             sqlx::query(

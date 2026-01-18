@@ -1,5 +1,8 @@
+use indicatif::{ProgressBar, ProgressStyle};
+use std::ffi::OsStr;
 use std::fs::{self, DirEntry};
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 use zip::ZipArchive;
 
 use anyhow::{Context, bail};
@@ -9,6 +12,7 @@ use crate::schemas::dictionary_index::DictionaryIndex;
 use crate::schemas::dictionary_tag_bank_v3::DictionaryTagBankV3;
 use crate::schemas::dictionary_term_bank_v3::DictionaryTermBankV3;
 use crate::util::config::Config;
+use crate::util::progress::{get_progress_bar, get_style};
 pub struct Dict<'a> {
     pub config: &'a Config,
 }
@@ -45,8 +49,12 @@ impl<'a> Dict<'a> {
     fn parse_term_bank(&self, entries: &[DirEntry]) -> anyhow::Result<DictionaryTermBankV3> {
         let entries = self.get_entries(entries, "term_bank_".to_string())?;
         let mut all_terms = Vec::new();
+
+        let pb = get_progress_bar(entries.len() as u64);
         for entry in entries {
             let content = fs::read_to_string(&entry);
+            let file_name = &entry.file_name().unwrap_or(OsStr::new("never"));
+            pb.set_message(format!("{}", &file_name.to_string_lossy()));
             match content {
                 Ok(content) => {
                     let mut terms: DictionaryTermBankV3 = serde_json::from_str(&content)?;
@@ -56,7 +64,10 @@ impl<'a> Dict<'a> {
                     bail!("Failed to read {}: {}", entry.display(), e)
                 }
             }
+            pb.inc(1);
         }
+        pb.finish_and_clear();
+
         Ok(all_terms)
     }
 
@@ -106,7 +117,13 @@ impl<'a> Dict<'a> {
 
         let dict_file = fs::File::open(&dictionary)?;
         let mut dict_archive = ZipArchive::new(&dict_file)?;
+
+        let pb = ProgressBar::new_spinner();
+        pb.enable_steady_tick(Duration::from_millis(100));
+        pb.set_message(format!("Extracting {}", dict_file_name.to_string_lossy()));
         dict_archive.extract(&dict_extract_path)?;
+        pb.finish_and_clear();
+
         Ok(dict_extract_path)
     }
 }
