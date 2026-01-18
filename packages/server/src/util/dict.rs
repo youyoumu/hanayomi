@@ -1,10 +1,12 @@
 use console::style;
 use indicatif::ProgressBar;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::ffi::OsStr;
 use std::fs::{self, DirEntry};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::time::Duration;
-use zip::ZipArchive;
+use zip::ZipArchive; // 1. Import Rayon traits
 
 use anyhow::{Context, bail};
 
@@ -53,25 +55,24 @@ impl<'a> Dict<'a> {
 
     fn parse_term_bank(&self, entries: &[DirEntry]) -> anyhow::Result<DictionaryTermBankV3> {
         let entries = self.get_entries(entries, "term_bank_".to_string())?;
-        let mut all_terms = Vec::new();
 
         let pb = get_progress_bar(entries.len() as u64);
-        for entry in entries {
-            let content = fs::read_to_string(&entry);
-            let file_name = &entry.file_name().unwrap_or(OsStr::new("never"));
-            pb.set_message(format!("{}", &file_name.to_string_lossy()));
-            match content {
-                Ok(content) => {
-                    let mut terms: DictionaryTermBankV3 = serde_json::from_str(&content)?;
-                    all_terms.append(&mut terms);
-                }
-                Err(e) => {
-                    bail!("Failed to read {}: {}", entry.display(), e)
-                }
-            }
-            pb.inc(1);
-        }
-        pb.finish_and_clear();
+        let pb = Arc::new(pb);
+
+        let all_terms: anyhow::Result<Vec<DictionaryTermBankV3>> = entries
+            .par_iter()
+            .map(|entry| {
+                let file_name = &entry.file_name().unwrap_or(OsStr::new("never"));
+                pb.set_message(format!("{}", &file_name.to_string_lossy()));
+
+                let content = fs::read_to_string(entry)?;
+                let terms: DictionaryTermBankV3 = serde_json::from_str(&content)?;
+
+                pb.inc(1);
+                Ok(terms)
+            })
+            .collect();
+        let all_terms = all_terms?.into_iter().flatten().collect();
 
         Ok(all_terms)
     }

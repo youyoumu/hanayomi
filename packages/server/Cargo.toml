@@ -17,6 +17,7 @@ sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio"] }
 chrono = { version = "0.4.43", features = ["serde"] }
 zip = "7.1.0"
 # v0.15.3 does not work on
+indicatif = { version = "0.18.3" }
 lzma-rust2 = "0.15.7"
-indicatif = "0.18.3"
 console = "0.16.2"
+rayon = "1.11.0"
