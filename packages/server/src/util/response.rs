@@ -7,11 +7,11 @@ pub type HandlerResult<T> = Result<(StatusCode, Json<Response<T>>), ErrorRespons
 
 #[derive(Serialize, Deserialize)]
 pub struct Response<T> {
-    status: ResponseStatus,
+    pub status: ResponseStatus,
     #[serde(skip_serializing_if = "Option::is_none")]
-    data: Option<T>,
+    pub data: Option<T>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    message: Option<String>,
+    pub message: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]

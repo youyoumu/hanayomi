@@ -1,6 +1,8 @@
 use axum::{http::StatusCode, response::IntoResponse};
+use std::error::Error;
+use validator::ValidationError;
 
-pub struct ErrorResponse(anyhow::Error);
+pub struct ErrorResponse(pub anyhow::Error);
 
 impl From<anyhow::Error> for ErrorResponse {
     fn from(value: anyhow::Error) -> Self {
