@@ -1,4 +1,4 @@
-use axum::{Json, http::StatusCode, response::IntoResponse};
+use axum::{Json, extract::rejection::QueryRejection, http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use validator::{ValidationError, ValidationErrors};
@@ -86,5 +86,23 @@ impl IntoResponse for ErrorResponse {
         } else {
             fail::<()>(self.error.to_string(), self.status_code).into_response()
         }
+    }
+}
+
+pub struct RejectionResponse {
+    message: String,
+}
+
+impl From<QueryRejection> for RejectionResponse {
+    fn from(value: QueryRejection) -> Self {
+        Self {
+            message: value.to_string(),
+        }
+    }
+}
+
+impl IntoResponse for RejectionResponse {
+    fn into_response(self) -> axum::response::Response {
+        fail::<()>(self.message, StatusCode::BAD_REQUEST).into_response()
     }
 }
