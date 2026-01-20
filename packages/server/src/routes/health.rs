@@ -1,6 +1,5 @@
-use crate::util::error::ErrorResponse;
-use axum::http::StatusCode;
+use crate::util::response::{HandlerResult, success};
 
-pub async fn index() -> Result<(StatusCode, &'static str), ErrorResponse> {
-    Ok((StatusCode::OK, "Ok"))
+pub async fn index() -> HandlerResult<String> {
+    success("Ok".to_string())
 }
