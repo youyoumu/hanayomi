@@ -22,7 +22,7 @@ impl Db {
                 title, revision, author, description, attribution, url,
                 source_language, target_language, frequency_mode,
                 format, sequenced, minimum_yomitan_version,
-                is_updatable, index_url, download_url, tag_meta_json
+                is_updatable, index_url, download_url, tag_meta
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             RETURNING id
             "#,
@@ -123,7 +123,7 @@ impl Db {
     pub async fn query_dictionary(&self, dictionary_id: i32) -> anyhow::Result<Option<Dictionary>> {
         let row: Option<Dictionary> = sqlx::query_as(
             r#"--sql
-            SELECT * FROM dictionary WHERE dictionary_id = ?
+            SELECT * FROM dictionary WHERE id = ?
             "#,
         )
         .bind(dictionary_id)

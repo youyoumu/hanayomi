@@ -23,7 +23,7 @@ CREATE TABLE dictionary (
     download_url TEXT,
 
     -- JSON Metadata (Stored as a String)
-    tag_meta_json TEXT
+    tag_meta TEXT
 );
 
 CREATE TABLE dictionary_entry (
