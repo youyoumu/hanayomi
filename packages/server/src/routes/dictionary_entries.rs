@@ -1,8 +1,7 @@
 use crate::{
     db::tables::DictionaryEntry,
     util::{
-        error::ErrorResponse,
-        response::{HandlerResult, Response, fail, success},
+        response::{ErrorResponse, HandlerResult, Response, fail, success},
         state::AppState,
     },
 };
@@ -15,7 +14,7 @@ use axum::{
 use axum_extra::extract::WithRejection;
 use serde::Deserialize;
 use std::collections::HashMap;
-use validator::{Validate, ValidationError};
+use validator::{Validate, ValidationError, ValidationErrors};
 
 #[derive(Deserialize, Validate)]
 pub struct IndexParams {
@@ -41,17 +40,11 @@ impl IntoResponse for AppRejection {
     }
 }
 
-impl From<ValidationError> for ErrorResponse {
-    fn from(value: ValidationError) -> Self {
-        let err = anyhow::anyhow!(value.to_string());
-        Self(err)
-    }
-}
-
 pub async fn index(
     State(state): State<AppState>,
     WithRejection(Query(params), _): WithRejection<Query<IndexParams>, AppRejection>,
 ) -> HandlerResult<Vec<DictionaryEntry>> {
+    params.validate()?;
     let expression = params.expression;
 
     let definition = state

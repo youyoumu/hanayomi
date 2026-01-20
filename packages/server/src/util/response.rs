@@ -1,7 +1,7 @@
-use axum::{Json, http::StatusCode};
+use axum::{Json, http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
-
-use crate::util::error::ErrorResponse;
+use std::error::Error;
+use validator::{ValidationError, ValidationErrors};
 
 pub type HandlerResult<T> = Result<(StatusCode, Json<Response<T>>), ErrorResponse>;
 
@@ -53,4 +53,38 @@ pub fn error<T>(message: String) -> HandlerResult<T> {
             message: Some(message),
         }),
     ))
+}
+
+pub struct ErrorResponse {
+    pub error: anyhow::Error,
+    pub status_code: StatusCode,
+}
+
+impl From<anyhow::Error> for ErrorResponse {
+    fn from(value: anyhow::Error) -> Self {
+        Self {
+            error: value,
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+}
+
+impl From<ValidationErrors> for ErrorResponse {
+    fn from(value: ValidationErrors) -> Self {
+        let err = anyhow::anyhow!(value.to_string());
+        Self {
+            error: err,
+            status_code: StatusCode::BAD_REQUEST,
+        }
+    }
+}
+
+impl IntoResponse for ErrorResponse {
+    fn into_response(self) -> axum::response::Response {
+        if self.status_code == StatusCode::INTERNAL_SERVER_ERROR {
+            error::<()>(self.error.to_string()).into_response()
+        } else {
+            fail::<()>(self.error.to_string(), self.status_code).into_response()
+        }
+    }
 }
