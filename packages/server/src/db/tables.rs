@@ -33,10 +33,11 @@ pub struct Dictionary {
 
     // Metadata / Obsolete fields stored as JSON string if needed
     // Otherwise, you can leave this out if you use separate Tag files
-    pub tag_meta_json: Option<TagMeta>,
+    #[sqlx(json)]
+    pub tag_meta: Option<TagMeta>,
 }
 
-#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct DictionaryEntry {
     pub id: i32,
     pub created_at: DateTime<Utc>,

@@ -12,7 +12,10 @@ pub async fn expression(
     State(state): State<AppState>,
     Path(expression): Path<String>,
 ) -> Result<(StatusCode, Json<Vec<DictionaryEntry>>), ErrorResponse> {
-    let definition = state.db.query_dict(expression.clone()).await?;
+    let definition = state
+        .db
+        .query_dictionary_entry_by(expression.clone())
+        .await?;
 
     Ok((StatusCode::OK, Json(definition)))
 }

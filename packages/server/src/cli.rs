@@ -100,7 +100,7 @@ pub async fn cli() -> anyhow::Result<()> {
                 let config = Config::new(workdir, host, port)?;
                 let config = Arc::new(config);
                 let db = Db::new(config.clone()).await?;
-                let definition = db.query_dict(expression).await?;
+                let definition = db.query_dictionary_entry_by(expression).await?;
                 println!("{}", json!(definition));
             }
         },

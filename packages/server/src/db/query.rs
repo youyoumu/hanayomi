@@ -1,4 +1,4 @@
-use crate::db::tables::DictionaryEntry;
+use crate::db::tables::{DefinitionTag, Dictionary, DictionaryEntry};
 use crate::schemas::dictionary_index::DictionaryIndex;
 use crate::schemas::dictionary_tag_bank_v3::DictionaryTagBankV3;
 use crate::schemas::dictionary_term_bank_v3::DictionaryTermBankV3;
@@ -105,13 +105,43 @@ impl Db {
         Ok(())
     }
 
-    pub async fn query_dict(&self, expression: String) -> anyhow::Result<Vec<DictionaryEntry>> {
+    pub async fn query_dictionary_entry_by(
+        &self,
+        expression: String,
+    ) -> anyhow::Result<Vec<DictionaryEntry>> {
         let row: Vec<DictionaryEntry> = sqlx::query_as(
             r#"--sql
             SELECT * FROM dictionary_entry WHERE expression = ?
             "#,
         )
         .bind(&expression)
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(row)
+    }
+
+    pub async fn query_dictionary(&self, dictionary_id: i32) -> anyhow::Result<Option<Dictionary>> {
+        let row: Option<Dictionary> = sqlx::query_as(
+            r#"--sql
+            SELECT * FROM dictionary WHERE dictionary_id = ?
+            "#,
+        )
+        .bind(dictionary_id)
+        .fetch_optional(&self.pool)
+        .await?;
+        Ok(row)
+    }
+
+    pub async fn query_definition_tag_by(
+        &self,
+        name: String,
+    ) -> anyhow::Result<Vec<DefinitionTag>> {
+        let row: Vec<DefinitionTag> = sqlx::query_as(
+            r#"--sql
+            SELECT * FROM definition_tag WHERE name = ?
+            "#,
+        )
+        .bind(&name)
         .fetch_all(&self.pool)
         .await?;
         Ok(row)
