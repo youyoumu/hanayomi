@@ -16,7 +16,7 @@ pub struct IndexQueryParams {
     pub expression: String,
 }
 
-pub async fn index(
+pub async fn search(
     State(state): State<AppState>,
     WithRejection(Query(params), _): WithRejection<Query<IndexQueryParams>, RejectionResponse>,
 ) -> HandlerResult<Vec<DictionaryEntry>> {

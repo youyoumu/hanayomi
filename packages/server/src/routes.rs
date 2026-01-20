@@ -8,13 +8,14 @@ mod dictionary_entries;
 mod health;
 mod index;
 
+#[rustfmt::skip]
 pub fn create_routes(state: AppState) -> Router {
     Router::new()
-        .route("/", get(index::index))
-        .route("/health", get(health::index))
-        .route("/dictionary_entries", get(dictionary_entries::index))
-        .route("/definition_tags", get(definition_tags::index))
-        .route("/dictionaries/{dictionary_id}", get(dictionaries::index))
+        .route("/", get(index::root))
+        .route("/health", get(health::status))
+        .route("/dictionary_entries/search", get(dictionary_entries::search))
+        .route("/definition_tags/search", get(definition_tags::search))
+        .route("/dictionaries/{dictionary_id}", get(dictionaries::show))
         .with_state(state)
         .layer(CatchPanicLayer::new())
 }

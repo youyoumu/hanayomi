@@ -11,7 +11,7 @@ use axum::{
 };
 use axum_extra::extract::WithRejection;
 
-pub async fn index(
+pub async fn show(
     State(state): State<AppState>,
     WithRejection(Path(dictionary_id), _): WithRejection<Path<i32>, RejectionResponse>,
 ) -> HandlerResult<Dictionary> {
