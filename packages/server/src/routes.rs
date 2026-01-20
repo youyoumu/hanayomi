@@ -2,15 +2,15 @@ use crate::util::state::AppState;
 use axum::{Router, routing::get};
 use tower_http::catch_panic::CatchPanicLayer;
 
+mod dictionary_entries;
 mod health;
 mod index;
-mod query;
 
 pub fn create_routes(state: AppState) -> Router {
     Router::new()
         .route("/", get(index::index))
         .route("/health", get(health::index))
-        .route("/query/{expression}", get(query::expression))
+        .route("/dictionary_entries", get(dictionary_entries::index))
         .with_state(state)
         .layer(CatchPanicLayer::new())
 }
