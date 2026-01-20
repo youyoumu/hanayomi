@@ -12,6 +12,7 @@ pub fn create_routes(state: AppState) -> Router {
         .route("/", get(index::index))
         .route("/health", get(health::index))
         .route("/dictionary_entries", get(dictionary_entries::index))
+        .route("/definition_tags", get(definition_tags::index))
         .with_state(state)
         .layer(CatchPanicLayer::new())
 }

@@ -1,5 +1,5 @@
 use crate::{
-    db::tables::DictionaryEntry,
+    db::tables::DefinitionTag,
     util::{
         response::{HandlerResult, RejectionResponse, success},
         state::AppState,
@@ -13,19 +13,16 @@ use validator::Validate;
 #[derive(Deserialize, Validate)]
 pub struct IndexQueryParams {
     #[validate(length(min = 1))]
-    pub expression: String,
+    pub name: String,
 }
 
 pub async fn index(
     State(state): State<AppState>,
     WithRejection(Query(params), _): WithRejection<Query<IndexQueryParams>, RejectionResponse>,
-) -> HandlerResult<Vec<DictionaryEntry>> {
+) -> HandlerResult<Vec<DefinitionTag>> {
     params.validate()?;
-    let expression = params.expression;
+    let name = params.name;
 
-    let definition = state
-        .db
-        .query_dictionary_entry_by(expression.clone())
-        .await?;
-    success(definition)
+    let tags = state.db.query_definition_tag_by(name).await?;
+    success(tags)
 }
