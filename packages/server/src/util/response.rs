@@ -1,7 +1,6 @@
 use axum::{Json, extract::rejection::QueryRejection, http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
-use std::error::Error;
-use validator::{ValidationError, ValidationErrors};
+use validator::ValidationErrors;
 
 pub type HandlerResult<T> = Result<(StatusCode, Json<Response<T>>), ErrorResponse>;
 

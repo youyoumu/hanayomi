@@ -6,7 +6,7 @@ use sqlx::sqlite::SqlitePool;
 use std::sync::Arc;
 
 pub struct Db {
-    config: Arc<Config>,
+    // config: Arc<Config>,
     pool: SqlitePool,
 }
 
@@ -17,6 +17,6 @@ impl Db {
         let pool = SqlitePool::connect(&file).await?;
         sqlx::migrate!("./migrations").run(&pool).await?;
 
-        Ok(Self { config, pool })
+        Ok(Self { pool })
     }
 }
