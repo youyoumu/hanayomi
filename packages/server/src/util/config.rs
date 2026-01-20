@@ -5,6 +5,7 @@ use std::{env, fs};
 pub struct Config {
     pub dir: Dir,
     pub file: File,
+    pub server: Server,
 }
 
 pub struct Dir {
@@ -18,8 +19,13 @@ pub struct File {
     pub db: PathBuf,
 }
 
+pub struct Server {
+    pub host: String,
+    pub port: u16,
+}
+
 impl Config {
-    pub fn new(workdir: Option<String>) -> anyhow::Result<Self> {
+    pub fn new(workdir: Option<String>, host: String, port: u16) -> anyhow::Result<Self> {
         let current_exe_dir = env::current_exe()?
             .parent()
             .context("Failed to get parent dir of current_exe")?
@@ -43,7 +49,8 @@ impl Config {
         let file = File {
             db: dir.db.join("db.sqlite"),
         };
-        let config = Config { dir, file };
+        let server = Server { host, port };
+        let config = Config { dir, file, server };
         Ok(config)
     }
 }

@@ -1,10 +1,12 @@
 use anyhow::Context;
 
-use crate::routes::create_routes;
+use crate::{db::Db, routes::create_routes, util::config::Config};
 
-pub async fn serve(host: String, port: u16) -> anyhow::Result<()> {
+pub async fn serve(config: &Config) -> anyhow::Result<()> {
     let app = create_routes();
-    let address = format!("{}:{}", host, port);
+    let address = format!("{}:{}", config.server.host, config.server.port);
+    let db = Db::new(&config).await?;
+    let shared_state = std::sync::Arc::new(db);
 
     println!("Starting server at {}", address);
 

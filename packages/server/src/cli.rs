@@ -64,34 +64,37 @@ enum DictCommands {
 pub async fn cli() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
+    let host = "127.0.0.1".to_string();
+    let port = 45636;
+
     match cli.command {
         Commands::Serve {
             port,
             host,
             workdir,
         } => {
-            let _config = Config::new(workdir)?;
-            serve(host, port).await?
+            let config = Config::new(workdir, host, port)?;
+            serve(&config).await?
         }
         Commands::Dict { action } => match action {
             DictCommands::Parse {
                 workdir,
                 dictionary,
             } => {
-                let config = Config::new(workdir)?;
+                let config = Config::new(workdir, host, port)?;
                 let db = Db::new(&config).await?;
                 let dict = Dict::new(&config);
                 dict.parse_dict(dictionary, &db).await?;
             }
             DictCommands::Check { workdir } => {
                 println!("Checking dictionary...");
-                let _config = Config::new(workdir)?;
+                let _config = Config::new(workdir, host, port)?;
             }
             DictCommands::Query {
                 workdir,
                 expression,
             } => {
-                let config = Config::new(workdir)?;
+                let config = Config::new(workdir, host, port)?;
                 let db = Db::new(&config).await?;
                 let definition = db.query_dict(expression).await?;
                 println!("{}", json!(definition));
