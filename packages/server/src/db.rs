@@ -1,10 +1,9 @@
-mod query;
-mod tables;
-
-use std::sync::Arc;
+pub mod query;
+pub mod tables;
 
 use crate::util::config::Config;
 use sqlx::sqlite::SqlitePool;
+use std::sync::Arc;
 
 pub struct Db {
     config: Arc<Config>,

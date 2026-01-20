@@ -1,14 +1,18 @@
+use crate::{
+    db::Db,
+    routes::create_routes,
+    util::{config::Config, state::AppState},
+};
+use anyhow::Context;
 use std::sync::Arc;
 
-use anyhow::Context;
-
-use crate::{db::Db, routes::create_routes, util::config::Config};
-
 pub async fn serve(config: Arc<Config>) -> anyhow::Result<()> {
-    let app = create_routes();
+    let db = Db::new(config.clone()).await?;
+    let db = Arc::new(db);
+    let state = AppState { db: db.clone() };
+
+    let app = create_routes(state);
     let address = format!("{}:{}", config.server.host, config.server.port);
-    let db = Db::new(config).await?;
-    let shared_state = std::sync::Arc::new(db);
 
     println!("Starting server at {}", address);
 
