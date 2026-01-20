@@ -1,4 +1,9 @@
-use axum::{Json, extract::rejection::QueryRejection, http::StatusCode, response::IntoResponse};
+use axum::{
+    Json,
+    extract::rejection::{PathRejection, QueryRejection},
+    http::StatusCode,
+    response::IntoResponse,
+};
 use serde::{Deserialize, Serialize};
 use validator::ValidationErrors;
 
@@ -94,6 +99,14 @@ pub struct RejectionResponse {
 
 impl From<QueryRejection> for RejectionResponse {
     fn from(value: QueryRejection) -> Self {
+        Self {
+            message: value.to_string(),
+        }
+    }
+}
+
+impl From<PathRejection> for RejectionResponse {
+    fn from(value: PathRejection) -> Self {
         Self {
             message: value.to_string(),
         }
