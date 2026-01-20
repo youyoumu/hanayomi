@@ -25,6 +25,7 @@ impl<'a> Dict<'a> {
         Self { config }
     }
 
+    // TODO: duplicate check
     pub async fn parse_dict(&self, dictionary: String, db: &Db<'a>) -> anyhow::Result<()> {
         println!("{} Extracting...", style("[1/3]").bold().dim(),);
         let dict_extract_path = self.extract_dict(dictionary)?;

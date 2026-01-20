@@ -1,3 +1,4 @@
+use crate::db::tables::DictionaryEntry;
 use crate::schemas::dictionary_index::DictionaryIndex;
 use crate::schemas::dictionary_tag_bank_v3::DictionaryTagBankV3;
 use crate::schemas::dictionary_term_bank_v3::DictionaryTermBankV3;
@@ -102,5 +103,17 @@ impl<'a> Db<'a> {
     pub async fn _vacuum(&self) -> anyhow::Result<()> {
         sqlx::query("VACUUM").execute(&self.pool).await?;
         Ok(())
+    }
+
+    pub async fn query_dict(&self, expression: String) -> anyhow::Result<Vec<DictionaryEntry>> {
+        let row: Vec<DictionaryEntry> = sqlx::query_as(
+            r#"--sql
+            SELECT * FROM dictionary_entry WHERE expression = ?
+            "#,
+        )
+        .bind(&expression)
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(row)
     }
 }

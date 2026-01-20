@@ -3,6 +3,7 @@ use crate::server::serve;
 use crate::util::config::Config;
 use crate::util::dict::Dict;
 use clap::{Parser, Subcommand};
+use serde_json::json;
 
 #[derive(Parser, Debug)]
 #[command(name = "hanayomi")]
@@ -50,6 +51,14 @@ enum DictCommands {
         #[arg(long)]
         workdir: Option<String>,
     },
+
+    #[command(about = "Query the dictionary")]
+    Query {
+        #[arg(long)]
+        workdir: Option<String>,
+        #[arg(long)]
+        expression: String,
+    },
 }
 
 pub async fn cli() -> anyhow::Result<()> {
@@ -77,6 +86,15 @@ pub async fn cli() -> anyhow::Result<()> {
             DictCommands::Check { workdir } => {
                 println!("Checking dictionary...");
                 let _config = Config::new(workdir)?;
+            }
+            DictCommands::Query {
+                workdir,
+                expression,
+            } => {
+                let config = Config::new(workdir)?;
+                let db = Db::new(&config).await?;
+                let definition = db.query_dict(expression).await?;
+                println!("{}", json!(definition));
             }
         },
     };

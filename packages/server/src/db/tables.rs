@@ -1,8 +1,9 @@
 use crate::schemas::{dictionary_index::TagMeta, dictionary_term_bank_v3::Definition};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Dictionary {
     pub id: i32,
     pub created_at: DateTime<Utc>,
@@ -35,7 +36,7 @@ pub struct Dictionary {
     pub tag_meta_json: Option<TagMeta>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct DictionaryEntry {
     pub id: i32,
     pub created_at: DateTime<Utc>,
@@ -44,6 +45,7 @@ pub struct DictionaryEntry {
 
     pub expression: String,
     pub reading: String,
+    #[sqlx(json)]
     pub definitions: Vec<Definition>,
     pub rules: String,
     pub score: f32,
@@ -52,7 +54,7 @@ pub struct DictionaryEntry {
     pub expression_tags: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct DefinitionTag {
     pub id: i32,
     pub created_at: DateTime<Utc>,
