@@ -4,6 +4,7 @@ use crate::util::config::Config;
 use crate::util::dict::Dict;
 use clap::{Parser, Subcommand};
 use serde_json::json;
+use std::sync::Arc;
 
 #[derive(Parser, Debug)]
 #[command(name = "hanayomi")]
@@ -74,7 +75,8 @@ pub async fn cli() -> anyhow::Result<()> {
             workdir,
         } => {
             let config = Config::new(workdir, host, port)?;
-            serve(&config).await?
+            let config = Arc::new(config);
+            serve(config.clone()).await?
         }
         Commands::Dict { action } => match action {
             DictCommands::Parse {
@@ -82,9 +84,10 @@ pub async fn cli() -> anyhow::Result<()> {
                 dictionary,
             } => {
                 let config = Config::new(workdir, host, port)?;
-                let db = Db::new(&config).await?;
-                let dict = Dict::new(&config);
-                dict.parse_dict(dictionary, &db).await?;
+                let config = Arc::new(config);
+                let db = Db::new(config.clone()).await?;
+                let dict = Dict::new(config.clone());
+                dict.parse_dict(dictionary, db).await?;
             }
             DictCommands::Check { workdir } => {
                 println!("Checking dictionary...");
@@ -95,7 +98,8 @@ pub async fn cli() -> anyhow::Result<()> {
                 expression,
             } => {
                 let config = Config::new(workdir, host, port)?;
-                let db = Db::new(&config).await?;
+                let config = Arc::new(config);
+                let db = Db::new(config.clone()).await?;
                 let definition = db.query_dict(expression).await?;
                 println!("{}", json!(definition));
             }

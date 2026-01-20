@@ -7,7 +7,7 @@ use sqlx::Row;
 
 use super::*;
 
-impl<'a> Db<'a> {
+impl Db {
     pub async fn insert_dictionary_data(
         &self,
         dict: &DictionaryIndex,

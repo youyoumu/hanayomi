@@ -16,17 +16,17 @@ use crate::schemas::dictionary_tag_bank_v3::DictionaryTagBankV3;
 use crate::schemas::dictionary_term_bank_v3::DictionaryTermBankV3;
 use crate::util::config::Config;
 use crate::util::progress::get_progress_bar;
-pub struct Dict<'a> {
-    pub config: &'a Config,
+pub struct Dict {
+    pub config: Arc<Config>,
 }
 
-impl<'a> Dict<'a> {
-    pub fn new(config: &'a Config) -> Self {
+impl Dict {
+    pub fn new(config: Arc<Config>) -> Self {
         Self { config }
     }
 
     // TODO: duplicate check
-    pub async fn parse_dict(&self, dictionary: String, db: &Db<'a>) -> anyhow::Result<()> {
+    pub async fn parse_dict(&self, dictionary: String, db: Db) -> anyhow::Result<()> {
         println!("{} Extracting...", style("[1/3]").bold().dim(),);
         let dict_extract_path = self.extract_dict(dictionary)?;
 
