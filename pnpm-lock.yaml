@@ -17,6 +17,9 @@ importers:
 
   packages/popup-web:
     dependencies:
+      es-toolkit:
+        specifier: ^1.44.0
+        version: 1.44.0
       solid-js:
         specifier: ^1.9.10
         version: 1.9.10
@@ -398,6 +401,9 @@ packages:
   entities@6.0.1:
     resolution: {integrity: sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g==}
     engines: {node: '>=0.12'}
+
+  es-toolkit@1.44.0:
+    resolution: {integrity: sha512-6penXeZalaV88MM3cGkFZZfOoLGWshWWfdy0tWw/RlVVyhvMaWSBTOvXNeiW3e5FwdS5ePW0LGEu17zT139ktg==}
 
   escalade@3.2.0:
     resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
@@ -1033,6 +1039,8 @@ snapshots:
   electron-to-chromium@1.5.277: {}
 
   entities@6.0.1: {}
+
+  es-toolkit@1.44.0: {}
 
   escalade@3.2.0: {}
 
