@@ -1,1 +1,2 @@
-import "../../main.tsx";
+import { init } from "../../main.tsx";
+init();

@@ -1,12 +1,9 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
+import { Popup } from "./components/Popup";
 
-function App() {
-  return "Hello world";
+export function init() {
+  const root = document.getElementById("root");
+
+  render(() => <Popup />, root!);
 }
-
-export default App;
-
-const root = document.getElementById("root");
-
-render(() => <App />, root!);
