@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "serve": "cargo run -- serve",
+    "check": "cargo check",
     "fmt": "cargo fmt",
     "fmt:check": "cargo fmt --check",
     "lint": "cargo clippy",

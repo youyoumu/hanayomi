@@ -5,11 +5,18 @@
   "keywords": [],
   "author": "",
   "scripts": {
-    "fmt": "oxfmt",
-    "fmt:check": "oxfmt --check"
+    "dev": "turbo dev",
+    "check": "turbo check",
+    "fmt": "turbo fmt",
+    "fmt:check": "turbo fmt:check",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
+    "root:fmt": "oxfmt",
+    "root:fmt:check": "oxfmt --check"
   },
   "devDependencies": {
-    "oxfmt": "^0.26.0"
+    "oxfmt": "^0.26.0",
+    "turbo": "^2.7.5"
   },
   "packageManager": "pnpm@10.26.1"
 }

@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "preview": "vite preview",
+    "check": "tsc --noEmit",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "lint": "oxlint",
@@ -16,6 +17,7 @@
     "solid-js": "^1.9.10"
   },
   "devDependencies": {
+    "@repo/server": "workspace:*",
     "@types/node": "^24.10.1",
     "oxfmt": "^0.26.0",
     "oxlint": "^1.41.0",
