@@ -2,8 +2,14 @@
   "name": "hanayomi",
   "private": true,
   "description": "",
-  "scripts": {},
   "keywords": [],
   "author": "",
+  "scripts": {
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.26.0"
+  },
   "packageManager": "pnpm@10.26.1"
 }

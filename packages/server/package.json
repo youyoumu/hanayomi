@@ -1,7 +1,12 @@
 {
   "name": "@repo/server",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
-  "scripts": {}
+  "scripts": {
+    "fmt": "cargo fmt",
+    "fmt:check": "cargo fmt --check",
+    "lint": "cargo clippy",
+    "lint:fix": "cargo clippy --fix"
+  }
 }

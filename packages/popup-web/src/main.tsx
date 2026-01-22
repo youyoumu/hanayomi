@@ -2,7 +2,7 @@
 import { render } from "solid-js/web";
 
 function App() {
-	return "Hello world";
+  return "Hello world";
 }
 
 export default App;

@@ -2,6 +2,6 @@ import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
 
 export default defineConfig({
-	plugins: [solid()],
-	root: "./src/sample-page/sample1",
+  plugins: [solid()],
+  root: "./src/sample-page/sample1",
 });
