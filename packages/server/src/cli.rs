@@ -1,7 +1,7 @@
-use crate::db::Db;
 use crate::server::serve;
 use crate::util::config::Config;
 use crate::util::dict::Dict;
+use crate::{db::Db, util::lexer::Lexer};
 use clap::{Parser, Subcommand};
 use serde_json::json;
 use std::sync::Arc;
@@ -34,6 +34,12 @@ enum Commands {
         #[command(subcommand)]
         action: DictCommands,
     },
+
+    #[command(about = "Manage the Lexer")]
+    Lexer {
+        #[command(subcommand)]
+        action: LexerCommands,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -59,6 +65,15 @@ enum DictCommands {
         workdir: Option<String>,
         #[arg(long)]
         expression: String,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+enum LexerCommands {
+    #[command(about = "Tokenize s sentence")]
+    Tokenize {
+        #[arg(long)]
+        sentence: String,
     },
 }
 
@@ -102,6 +117,14 @@ pub async fn cli() -> anyhow::Result<()> {
                 let db = Db::new(config.clone()).await?;
                 let definition = db.query_dictionary_entry_by(expression).await?;
                 println!("{}", json!(definition));
+            }
+        },
+        Commands::Lexer { action } => match action {
+            LexerCommands::Tokenize { sentence } => {
+                let lexer = Lexer::new()?;
+                let tokens = lexer.tokenize(sentence);
+                let json = serde_json::to_string(&tokens)?;
+                println!("{}", json);
             }
         },
     };

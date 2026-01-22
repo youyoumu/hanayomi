@@ -25,3 +25,5 @@ console = "0.16.2"
 rayon = "1.11.0"
 validator = { version = "0.20.0", features = ["derive"] }
 axum-extra = { version = "0.12.5", features = ["with-rejection"] }
+vibrato = "0.5.2"
+zstd = "0.13.3"
