@@ -8,6 +8,19 @@ class WordIndexer {
   private offsets: number[] = [];
   private words: Word[];
 
+  static cache = new WeakMap<Word[], WordIndexer>();
+  static new(words: Word[]): WordIndexer {
+    const cache = WordIndexer.cache;
+    let wordIndexer: WordIndexer;
+    if (cache.has(words)) {
+      wordIndexer = cache.get(words)!;
+    } else {
+      wordIndexer = new WordIndexer(words);
+      cache.set(words, wordIndexer);
+    }
+    return wordIndexer;
+  }
+
   constructor(words: Word[]) {
     this.words = words;
     let currentLength = 0;
@@ -39,7 +52,13 @@ class WordIndexer {
 }
 
 export function init() {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: Infinity,
+      },
+    },
+  });
   const scanText = async (e: MouseEvent) => {
     // console.log(e.clientX, e.clientY);
     const result = document.caretPositionFromPoint(e.clientX, e.clientY);
@@ -47,13 +66,12 @@ export function init() {
       const node = result.offsetNode as Text;
       const offset = result.offset;
       const text = node.data;
-      console.log(offset, text);
 
       const words = await queryClient.fetchQuery({
         ...queries.tokenize.detail(text),
       });
 
-      const wordIndexer = new WordIndexer(words);
+      const wordIndexer = WordIndexer.new(words);
       const wordIndex = wordIndexer.getWordIndex(offset);
       const word = words[wordIndex];
       console.log("DEBUG[1422]: word=", word?.word);
@@ -66,7 +84,7 @@ export function init() {
       console.log("DEBUG[1426]: dictionaryEntries=", dictionaryEntries);
     }
   };
-  const dScanText = debounce(scanText, 10);
+  const dScanText = debounce(scanText, 0);
 
   document.addEventListener("mousemove", dScanText);
 }
