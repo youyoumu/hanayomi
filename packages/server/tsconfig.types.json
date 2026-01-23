@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/util/ve/mecab_ipadic_types.ts", "src/schemas/dictionary_term_bank_v3_types.ts"]
+}

@@ -3,11 +3,19 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "types": "./dist/types",
   "exports": {
-    "./types/mecab-ipadic": "./src/util/ve/mecab_ipadic_types.ts"
+    "./types/mecab-ipadic": {
+      "types": "./dist/types/util/ve/mecab_ipadic_types.d.ts"
+    },
+    "./types/dictionary-term-bank-v3": {
+      "types": "./dist/types/schemas/dictionary_term_bank_v3_types.d.ts"
+    }
   },
   "scripts": {
     "serve": "cargo run -- serve",
+    "check:typescript": "tsc --noEmit",
+    "build:typescript": "tsc --emitDeclarationOnly --project tsconfig.types.json",
     "check": "cargo check",
     "fmt": "cargo fmt",
     "fmt:check": "cargo fmt --check",

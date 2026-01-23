@@ -6,8 +6,9 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "target/**"]
     },
+    "build:typescript": {},
     "check": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "^build:typescript"]
     },
     "fmt": {},
     "lint": {
@@ -18,10 +19,10 @@
       "persistent": true
     },
     "dev": {
-      "with": ["@repo/server#serve"],
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "with": ["@repo/server#serve"],
+      "dependsOn": ["@repo/server#build:typescript"]
     }
   }
 }
-
