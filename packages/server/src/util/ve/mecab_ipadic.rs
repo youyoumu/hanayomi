@@ -33,6 +33,7 @@ pub struct PreparedToken {
 }
 
 #[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
+#[allow(clippy::upper_case_acronyms)]
 enum POS {
     Meishi,
     KoyuuMeishi,
@@ -316,6 +317,7 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
                     }
                     POS::Kazu => {
                         pos = Some(PartOfSpeech::Number);
+                        #[allow(clippy::len_zero)]
                         if words.len() > 0
                             && words
                                 .last()
@@ -354,6 +356,7 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
             POS::JoDoushi => {
                 pos = Some(PartOfSpeech::Postposition);
 
+                #[allow(clippy::if_same_then_else)]
                 if (previous.is_none() || (previous.is_some_and(|p| p.pos2 != POS::Kakarijoshi)))
                     && [
                         POS::TokushuTa,
@@ -375,6 +378,7 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
             }
             POS::Doushi => {
                 pos = Some(PartOfSpeech::Verb);
+                #[allow(clippy::if_same_then_else)]
                 if token.pos2 == POS::Setsubi {
                     attach_to_previous = true;
                 } else if token.pos2 == POS::Hijiritsu && token.inflection_form != POS::MeireiI {
@@ -420,6 +424,7 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
         }
         let pos = pos.unwrap();
 
+        #[allow(clippy::len_zero)]
         if attach_to_previous && words.len() > 0 {
             let last = words.last_mut().unwrap();
 
@@ -429,6 +434,7 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
             last.extra.reading.push_str(&token.reading);
             last.extra.transcription.push_str(&token.hatsuon);
 
+            #[allow(clippy::collapsible_if)]
             if also_attach_to_lemma {
                 if let Some(ref mut lemma) = last.lemma {
                     lemma.push_str(&token.lemma)
@@ -465,6 +471,7 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
                 word.word.push_str(&following.literal);
                 word.extra.reading.push_str(&following.reading);
                 word.extra.transcription.push_str(&following.hatsuon);
+                #[allow(clippy::collapsible_if)]
                 if eat_lemma {
                     if let Some(ref mut lemma) = word.lemma {
                         lemma.push_str(&following.lemma)
