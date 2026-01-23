@@ -1,5 +1,5 @@
 use anyhow::{Result, bail};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 /// Simple struct that abstracts away vibrato's own Tokens
 /// that for some reason reference the worker they were tokenized from
@@ -20,23 +20,22 @@ impl From<vibrato::token::Token<'_, '_>> for VibratoToken {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PreparedToken {
-    literal: String,
-    pos: POS,
-    pos2: POS,
-    pos3: POS,
+    pub literal: String,
+    pub pos: POS,
+    pub pos2: POS,
+    pub pos3: POS,
     #[allow(dead_code)] // we're not using pos4 at all
-    pos4: POS,
-    inflection_type: POS,
-    inflection_form: POS,
-    lemma: String,
-    reading: String,
-    hatsuon: String,
+    pub pos4: POS,
+    pub inflection_type: POS,
+    pub inflection_form: POS,
+    pub lemma: String,
+    pub reading: String,
+    pub hatsuon: String,
 }
 
-#[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Clone, Debug)]
 #[allow(clippy::upper_case_acronyms)]
-#[serde(rename_all = "camelCase")]
-enum POS {
+pub enum POS {
     Meishi,
     KoyuuMeishi,
     DaiMeishi,
@@ -132,6 +131,77 @@ impl From<&str> for POS {
             "*" => Self::Unset,
             _ => Self::Unknown,
         }
+    }
+}
+
+impl POS {
+    /// Convert to Japanese string representation
+    pub fn to_japanese(&self) -> &'static str {
+        match self {
+            POS::Meishi => "名詞",
+            POS::KoyuuMeishi => "固有名詞",
+            POS::DaiMeishi => "代名詞",
+            POS::JoDoushi => "助動詞",
+            POS::Kazu => "数",
+            POS::Joshi => "助詞",
+            POS::Settoushi => "接頭詞",
+            POS::Doushi => "動詞",
+            POS::Kigou => "記号",
+            POS::Filler => "フィラー",
+            POS::Sonota => "その他",
+            POS::Kandoushi => "感動詞",
+            POS::Rentaishi => "連体詞",
+            POS::Setsuzokushi => "接続詞",
+            POS::Fukushi => "副詞",
+            POS::Setsuzokujoshi => "接続助詞",
+            POS::Keiyoushi => "形容詞",
+            POS::Hijiritsu => "非自立",
+            POS::Fukushikanou => "副詞可能",
+            POS::Sahensetsuzoku => "サ変接続",
+            POS::Keiyoudoushigokan => "形容動詞語幹",
+            POS::Naikeiyoushigokan => "ナイ形容詞語幹",
+            POS::Jodoushigokan => "助動詞語幹",
+            POS::Fukushika => "副詞化",
+            POS::Taigensetsuzoku => "体言接続",
+            POS::Rentaika => "連体化",
+            POS::Tokushu => "特殊",
+            POS::Setsubi => "接尾",
+            POS::Setsuzokushiteki => "接続詞的",
+            POS::Doushihijiritsuteki => "動詞非自立的",
+            POS::SahenSuru => "サ変・スル",
+            POS::TokushuTa => "特殊・タ",
+            POS::TokushuNai => "特殊・ナイ",
+            POS::TokushuTai => "特殊・タイ",
+            POS::TokushuDesu => "特殊・デス",
+            POS::TokushuDa => "特殊・ダ",
+            POS::TokushuMasu => "特殊・マス",
+            POS::TokushuNu => "特殊・ヌ",
+            POS::Fuhenkagata => "不変化型",
+            POS::Jinmei => "人名",
+            POS::MeireiI => "命令ｉ",
+            POS::Kakarijoshi => "係助詞",
+            POS::Unset => "*",
+            POS::Unknown => "未知",
+        }
+    }
+}
+
+impl Serialize for POS {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(self.to_japanese())
+    }
+}
+
+impl<'de> Deserialize<'de> for POS {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        Ok(POS::from(s.as_str()))
     }
 }
 
@@ -483,6 +553,7 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
                         lemma.push_str(&following.lemma)
                     }
                 }
+
                 word.tokens.push(following);
             }
 
@@ -497,6 +568,7 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use serde_json;
     use std::fs::File;
     use vibrato::{Dictionary, Tokenizer};
 
@@ -514,6 +586,42 @@ mod test {
 
         let tokens: Vec<VibratoToken> = worker.token_iter().map(|t| t.into()).collect();
         Ok(tokens)
+    }
+
+    #[test]
+    fn test_pos_serialization() {
+        let pos = POS::Meishi;
+        let json = serde_json::to_string(&pos).unwrap();
+        assert_eq!(json, "\"名詞\"");
+
+        let deserialized: POS = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, POS::Meishi);
+    }
+
+    #[test]
+    fn test_prepared_token_serialization() {
+        let token = PreparedToken {
+            literal: "test".to_string(),
+            pos: POS::Meishi,
+            pos2: POS::Unset,
+            pos3: POS::Unset,
+            pos4: POS::Unset,
+            inflection_type: POS::Unset,
+            inflection_form: POS::Unset,
+            lemma: "test".to_string(),
+            reading: "test".to_string(),
+            hatsuon: "test".to_string(),
+        };
+
+        let json = serde_json::to_string(&token).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(parsed["pos"], "名詞");
+        assert_eq!(parsed["literal"], "test");
+
+        // Test deserialization
+        let deserialized: PreparedToken = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized.pos, POS::Meishi);
     }
 
     #[test]
