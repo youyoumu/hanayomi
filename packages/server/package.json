@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./types/mecab-ipadic": "./src/util/ve/mecab_ipadic_types.ts"
+  },
   "scripts": {
     "serve": "cargo run -- serve",
     "check": "cargo check",

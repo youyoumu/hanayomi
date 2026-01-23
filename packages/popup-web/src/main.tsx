@@ -1,4 +1,5 @@
 import { debounce } from "es-toolkit";
+import type { Word } from "@repo/server/types/mecab-ipadic";
 
 /* @refresh reload */
 export function init() {
