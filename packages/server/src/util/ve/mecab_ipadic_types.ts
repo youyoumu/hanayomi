@@ -140,28 +140,3 @@ export interface VibratoToken {
   /** Feature string from MeCab dictionary */
   feature: string;
 }
-
-/**
- * Utility functions for working with linguistic data
- */
-export const POS = {
-  /** Check if a POS value represents a noun-like category */
-  isNoun: (pos: POS): boolean => {
-    return pos === "名詞" || pos === "固有名詞" || pos === "代名詞";
-  },
-
-  /** Check if a POS value represents a verb-like category */
-  isVerb: (pos: POS): boolean => {
-    return pos === "動詞" || pos === "助動詞";
-  },
-
-  /** Check if a POS value represents an adjective-like category */
-  isAdjective: (pos: POS): boolean => {
-    return pos === "形容詞" || pos === "形容動詞語幹" || pos === "ナイ形容詞語幹";
-  },
-
-  /** Check if a POS value represents an adverb-like category */
-  isAdverb: (pos: POS): boolean => {
-    return pos === "副詞" || pos === "副詞可能" || pos === "副詞化";
-  },
-} as const;

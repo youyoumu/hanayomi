@@ -10,6 +10,9 @@
     },
     "./types/dictionary-term-bank-v3": {
       "types": "./dist/types/schemas/dictionary_term_bank_v3_types.d.ts"
+    },
+    "./types/db": {
+      "types": "./dist/types/db/tables_types.d.ts"
     }
   },
   "scripts": {
