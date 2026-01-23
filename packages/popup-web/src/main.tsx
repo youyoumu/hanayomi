@@ -1,22 +1,43 @@
+/* @refresh reload */
 import { debounce } from "es-toolkit";
 import type { Word } from "@repo/server/types/mecab-ipadic";
 import { queries } from "./util/queryKeyFactory";
 import { QueryClient } from "@tanstack/solid-query";
 
-function getWordIndexAtGlobalIndex(words: Word[], globalIndex: number): number {
-  let currentLength = 0;
-  for (let i = 0; i < words.length; i++) {
-    const wordLength = words[i].word.length;
-    // Check if the globalIndex falls within the bounds of the current word
-    if (globalIndex >= currentLength && globalIndex < currentLength + wordLength) {
-      return i;
+class WordIndexer {
+  private offsets: number[] = [];
+  private words: Word[];
+
+  constructor(words: Word[]) {
+    this.words = words;
+    let currentLength = 0;
+    for (const w of words) {
+      this.offsets.push(currentLength);
+      currentLength += w.word.length;
     }
-    currentLength += wordLength;
   }
-  return -1; // Return -1 if the index is out of bounds
+
+  public getWordIndex(globalIndex: number): number {
+    let low = 0;
+    let high = this.offsets.length - 1;
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const start = this.offsets[mid];
+      const end = start + this.words[mid].word.length;
+
+      if (globalIndex >= start && globalIndex < end) {
+        return mid;
+      } else if (globalIndex < start) {
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return -1;
+  }
 }
 
-/* @refresh reload */
 export function init() {
   const queryClient = new QueryClient();
   const scanText = async (e: MouseEvent) => {
@@ -32,7 +53,8 @@ export function init() {
         ...queries.tokenize.detail(text),
       });
 
-      const wordIndex = getWordIndexAtGlobalIndex(words, offset);
+      const wordIndexer = new WordIndexer(words);
+      const wordIndex = wordIndexer.getWordIndex(offset);
       const word = words[wordIndex];
       console.log("DEBUG[1422]: word=", word.word);
 
