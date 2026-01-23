@@ -455,4 +455,4 @@ export type StructuredContentStyle = {
 /**
  * Number or string union for flexible numeric/string values
  */
-export type NumberOrString = { number: number } | { string: string };
+export type NumberOrString = number | string;

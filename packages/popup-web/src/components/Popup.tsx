@@ -1,8 +1,6 @@
 import type { DictionaryEntry } from "@repo/server/types/db";
-import type {
-  StructuredContent,
-  DetailedDefinition,
-} from "@repo/server/types/dictionary-term-bank-v3";
+import type { DetailedDefinition } from "@repo/server/types/dictionary-term-bank-v3";
+import { StructuredContentComponent } from "./StructuredContent";
 
 export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
   const definitions = props.dictionaryEntries[0]?.definitions;
@@ -25,19 +23,10 @@ export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
     return null;
   }
   if (detailedDefinition.type === "structured-content") {
-    const structuredContent = detailedDefinition.structuredContent.content;
+    return (
+      <StructuredContentComponent
+        structuredContent={detailedDefinition.structuredContent.content}
+      />
+    );
   }
-
-  return (
-    <div
-      style={{
-        width: "320px",
-        height: "240px",
-        "background-color": "navy",
-        color: "white",
-      }}
-    >
-      Hello world
-    </div>
-  );
 }
