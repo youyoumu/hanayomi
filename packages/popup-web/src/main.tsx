@@ -3,6 +3,8 @@ import { debounce } from "es-toolkit";
 import type { Word } from "@repo/server/types/mecab-ipadic";
 import { queries } from "./util/queryKeyFactory";
 import { QueryClient } from "@tanstack/solid-query";
+import { render } from "solid-js/web";
+import { Popup } from "./components/Popup";
 
 class WordIndexer {
   private offsets: number[] = [];
@@ -59,6 +61,8 @@ export function init() {
       },
     },
   });
+  const pupup = document.createElement("div");
+  document.body.appendChild(pupup);
   const scanText = async (e: MouseEvent) => {
     // console.log(e.clientX, e.clientY);
     const result = document.caretPositionFromPoint(e.clientX, e.clientY);
@@ -80,11 +84,14 @@ export function init() {
       const dictionaryEntries = await queryClient.fetchQuery({
         ...queries.dictionaryEntries.search(word.word),
       });
+      console.log("DEBUG[1434]: dictionaryEntries=", dictionaryEntries);
 
+      pupup.innerHTML = "";
+      render(() => <Popup dictionaryEntries={dictionaryEntries} />, pupup);
       console.log("DEBUG[1426]: dictionaryEntries=", dictionaryEntries);
     }
   };
-  const dScanText = debounce(scanText, 0);
+  const dScanText = debounce(scanText, 1000);
 
   document.addEventListener("mousemove", dScanText);
 }

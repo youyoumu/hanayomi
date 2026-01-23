@@ -31,9 +31,9 @@ export type Definition =
  * Detailed definition variants, tagged by type
  */
 export type DetailedDefinition =
-  | { type: "text"; text: TextDefinition }
-  | { type: "image"; image: ImageDefinition }
-  | { type: "structured-content"; structuredContent: StructuredContentDefinition };
+  | ({ type: "text" } & TextDefinition)
+  | ({ type: "image" } & ImageDefinition)
+  | ({ type: "structured-content" } & StructuredContentDefinition);
 
 /**
  * Text definition - simple string content
