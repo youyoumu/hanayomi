@@ -1,7 +1,7 @@
 use crate::{
     db::Db,
     routes::create_routes,
-    util::{config::Config, state::AppState},
+    util::{config::Config, lexer, state::AppState},
 };
 use anyhow::Context;
 use std::sync::Arc;
@@ -9,7 +9,12 @@ use std::sync::Arc;
 pub async fn serve(config: Arc<Config>) -> anyhow::Result<()> {
     let db = Db::new(config.clone()).await?;
     let db = Arc::new(db);
-    let state = AppState { db: db.clone() };
+    let lexer = lexer::Lexer::new()?;
+    let lexer = Arc::new(lexer);
+    let state = AppState {
+        db: db.clone(),
+        lexer: lexer.clone(),
+    };
 
     let app = create_routes(state);
     let address = format!("{}:{}", config.server.host, config.server.port);

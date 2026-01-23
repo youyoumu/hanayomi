@@ -11,14 +11,14 @@ use serde::Deserialize;
 use validator::Validate;
 
 #[derive(Deserialize, Validate)]
-pub struct IndexQueryParams {
+pub struct SearchQueryParams {
     #[validate(length(min = 1))]
     pub name: String,
 }
 
 pub async fn search(
     State(state): State<AppState>,
-    WithRejection(Query(params), _): WithRejection<Query<IndexQueryParams>, RejectionResponse>,
+    WithRejection(Query(params), _): WithRejection<Query<SearchQueryParams>, RejectionResponse>,
 ) -> HandlerResult<Vec<DefinitionTag>> {
     params.validate()?;
     let name = params.name;

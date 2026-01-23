@@ -18,6 +18,7 @@ impl From<vibrato::token::Token<'_, '_>> for VibratoToken {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PreparedToken {
     literal: String,
     pos: POS,
@@ -34,6 +35,7 @@ pub struct PreparedToken {
 
 #[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
 #[allow(clippy::upper_case_acronyms)]
+#[serde(rename_all = "camelCase")]
 enum POS {
     Meishi,
     KoyuuMeishi,
@@ -142,6 +144,7 @@ const NN: &str = "ん";
 const SA: &str = "さ";
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Word {
     pub word: String,
     pub lemma: Option<String>, // dictionary form
@@ -151,6 +154,7 @@ pub struct Word {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct WordExtra {
     pub reading: String,
     pub transcription: String,
@@ -158,6 +162,7 @@ pub struct WordExtra {
 }
 
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum PartOfSpeech {
     Noun,
     ProperNoun,
@@ -179,6 +184,7 @@ pub enum PartOfSpeech {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum Grammar {
     Auxillary,
     Nominal,
