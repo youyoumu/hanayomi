@@ -1,6 +1,8 @@
 import { debounce } from "es-toolkit";
 import type { Word } from "@repo/server/types/mecab-ipadic";
 import ky from "ky";
+import { queries } from "./util/queryKeyFactory";
+import { QueryClient } from "@tanstack/solid-query";
 
 function getWordIndexAtGlobalIndex(words: Word[], globalIndex: number): number {
   let currentLength = 0;
@@ -22,6 +24,7 @@ export function init() {
   const api = ky.create({
     prefixUrl: "http://localhost:45636",
   });
+  const queryClient = new QueryClient();
   const scanText = async (e: MouseEvent) => {
     // console.log(e.clientX, e.clientY);
     const result = document.caretPositionFromPoint(e.clientX, e.clientY);
