@@ -1,6 +1,5 @@
 import { debounce } from "es-toolkit";
 import type { Word } from "@repo/server/types/mecab-ipadic";
-import ky from "ky";
 import { queries } from "./util/queryKeyFactory";
 import { QueryClient } from "@tanstack/solid-query";
 
@@ -19,11 +18,6 @@ function getWordIndexAtGlobalIndex(words: Word[], globalIndex: number): number {
 
 /* @refresh reload */
 export function init() {
-  const tokenizeCache = new Map<string, Word[]>();
-
-  const api = ky.create({
-    prefixUrl: "http://localhost:45636",
-  });
   const queryClient = new QueryClient();
   const scanText = async (e: MouseEvent) => {
     // console.log(e.clientX, e.clientY);
@@ -34,30 +28,19 @@ export function init() {
       const text = node.data;
       // console.log(offset, text);
 
-      const response = await api
-        .get<{
-          result: "success";
-          data: Word[];
-        }>(`tokenize`, {
-          searchParams: {
-            sentence: text,
-          },
-        })
-        .json();
-      // console.log(response);
+      const words = await queryClient.fetchQuery({
+        ...queries.tokenize.detail(text),
+      });
 
-      const wordIndex = getWordIndexAtGlobalIndex(response.data, offset);
-      const word = response.data[wordIndex];
+      const wordIndex = getWordIndexAtGlobalIndex(words, offset);
+      const word = words[wordIndex];
       console.log("DEBUG[1422]: word=", word.word);
-      const response2 = await api
-        .get("dictionary_entries/search", {
-          searchParams: {
-            expression: word.word,
-          },
-        })
-        .json();
 
-      console.log("DEBUG[1423]: response2=", response2);
+      const dictionaryEntries = await queryClient.fetchQuery({
+        ...queries.dictionaryEntries.search(word.word),
+      });
+
+      console.log("DEBUG[1426]: dictionaryEntries=", dictionaryEntries);
     }
   };
   const dScanText = debounce(scanText, 100);
