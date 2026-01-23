@@ -23,8 +23,8 @@ class WordIndexer {
 
     while (low <= high) {
       const mid = Math.floor((low + high) / 2);
-      const start = this.offsets[mid];
-      const end = start + this.words[mid].word.length;
+      const start = this.offsets[mid]!;
+      const end = start + this.words[mid]!.word.length;
 
       if (globalIndex >= start && globalIndex < end) {
         return mid;
@@ -47,7 +47,7 @@ export function init() {
       const node = result.offsetNode as Text;
       const offset = result.offset;
       const text = node.data;
-      // console.log(offset, text);
+      console.log(offset, text);
 
       const words = await queryClient.fetchQuery({
         ...queries.tokenize.detail(text),
@@ -56,8 +56,9 @@ export function init() {
       const wordIndexer = new WordIndexer(words);
       const wordIndex = wordIndexer.getWordIndex(offset);
       const word = words[wordIndex];
-      console.log("DEBUG[1422]: word=", word.word);
+      console.log("DEBUG[1422]: word=", word?.word);
 
+      if (!word) return;
       const dictionaryEntries = await queryClient.fetchQuery({
         ...queries.dictionaryEntries.search(word.word),
       });
@@ -65,7 +66,7 @@ export function init() {
       console.log("DEBUG[1426]: dictionaryEntries=", dictionaryEntries);
     }
   };
-  const dScanText = debounce(scanText, 100);
+  const dScanText = debounce(scanText, 10);
 
   document.addEventListener("mousemove", dScanText);
 }
