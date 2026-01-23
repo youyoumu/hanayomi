@@ -4,12 +4,9 @@ import { StructuredContentComponent } from "./StructuredContent";
 
 export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
   const definitions = props.dictionaryEntries[0]?.definitions;
-  console.log("DEBUG[1433]: props.dictionaryEntries=", props.dictionaryEntries);
-  console.log("DEBUG[1432]: definitions=", definitions);
   if (!definitions) return null;
   const definition = definitions[0];
   if (!definition) return null;
-  console.log("DEBUG[1430]: definition=", definition);
   if (typeof definition === "string") {
     return definition;
   }

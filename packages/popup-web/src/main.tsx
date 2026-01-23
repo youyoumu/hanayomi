@@ -78,20 +78,17 @@ export function init() {
       const wordIndexer = WordIndexer.new(words);
       const wordIndex = wordIndexer.getWordIndex(offset);
       const word = words[wordIndex];
-      console.log("DEBUG[1422]: word=", word?.word);
 
       if (!word) return;
       const dictionaryEntries = await queryClient.fetchQuery({
         ...queries.dictionaryEntries.search(word.word),
       });
-      console.log("DEBUG[1434]: dictionaryEntries=", dictionaryEntries);
 
       pupup.innerHTML = "";
       render(() => <Popup dictionaryEntries={dictionaryEntries} />, pupup);
-      console.log("DEBUG[1426]: dictionaryEntries=", dictionaryEntries);
     }
   };
-  const dScanText = debounce(scanText, 1000);
+  const dScanText = debounce(scanText, 0);
 
   document.addEventListener("mousemove", dScanText);
 }
