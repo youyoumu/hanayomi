@@ -122,8 +122,14 @@ pub async fn cli() -> anyhow::Result<()> {
         Commands::Lexer { action } => match action {
             LexerCommands::Tokenize { sentence } => {
                 let lexer = Lexer::new()?;
-                let tokens = lexer.tokenize(sentence);
+                let tokens = lexer.tokenize(sentence)?;
                 let json = serde_json::to_string(&tokens)?;
+                println!("{}", json);
+                let sentence = tokens
+                    .iter()
+                    .map(|t| t.word.clone())
+                    .collect::<Vec<String>>();
+                let json = serde_json::to_string(&sentence)?;
                 println!("{}", json);
             }
         },
