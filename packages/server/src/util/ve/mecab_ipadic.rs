@@ -46,7 +46,7 @@ enum POS {
     Settoushi,
     Doushi,
     Kigou,
-    Firaa,
+    Filler,
     Sonota,
     Kandoushi,
     Rentaishi,
@@ -96,7 +96,7 @@ impl From<&str> for POS {
             "接頭詞" => Self::Settoushi,
             "動詞" => Self::Doushi,
             "記号" => Self::Kigou,
-            "フィラー" => Self::Firaa,
+            "フィラー" => Self::Filler,
             "その他" => Self::Sonota,
             "感動詞" => Self::Kandoushi,
             "連体詞" => Self::Rentaishi,
@@ -186,7 +186,7 @@ pub enum PartOfSpeech {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Grammar {
-    Auxillary,
+    Auxiliary,
     Nominal,
 }
 
@@ -296,7 +296,7 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
                                 POS::Jodoushigokan => {
                                     if following.inflection_type == POS::TokushuDa {
                                         pos = Some(PartOfSpeech::Verb);
-                                        grammar = Some(Grammar::Auxillary);
+                                        grammar = Some(Grammar::Auxiliary);
 
                                         if following.inflection_form == POS::Taigensetsuzoku {
                                             eat_next = true;
@@ -414,7 +414,7 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
             POS::Kigou => {
                 pos = Some(PartOfSpeech::Symbol);
             }
-            POS::Firaa | POS::Kandoushi => {
+            POS::Filler | POS::Kandoushi => {
                 pos = Some(PartOfSpeech::Interjection);
             }
             POS::Sonota => pos = Some(PartOfSpeech::Other),
