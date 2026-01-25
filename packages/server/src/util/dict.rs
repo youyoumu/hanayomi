@@ -27,10 +27,10 @@ impl Dict {
 
     // TODO: duplicate check
     pub async fn parse_dict(&self, dictionary: String, db: Db) -> anyhow::Result<()> {
-        println!("{} Extracting...", style("[1/3]").bold().dim(),);
+        println!("{} Extracting...", style("[1/4]").bold().dim(),);
         let dict_extract_path = self.extract_dict(dictionary)?;
 
-        println!("{} Parsing...", style("[2/3]").bold().dim());
+        println!("{} Parsing...", style("[2/4]").bold().dim());
         let entries =
             fs::read_dir(&dict_extract_path).context("Failed to read dictionary directory")?;
         let entries: Result<Vec<_>, _> = entries.collect();
@@ -41,9 +41,13 @@ impl Dict {
         let all_terms = Self::parse_term_bank(self, &entries)?;
         let all_tags = Self::parse_tag_bank(self, &entries)?;
 
-        println!("{} Inserting...", style("[3/3]").bold().dim());
-        db.insert_dictionary_data(&index, &all_terms, &all_tags)
+        println!("{} Inserting...", style("[3/4]").bold().dim());
+        let dictionary_id = db
+            .insert_dictionary_data(&index, &all_terms, &all_tags)
             .await?;
+
+        println!("{} Copying files...", style("[4/4]").bold().dim());
+        self.copy_dict(&dict_extract_path, dictionary_id)?;
 
         Ok(())
     }
@@ -133,4 +137,65 @@ impl Dict {
 
         Ok(dict_extract_path)
     }
+
+    //TODO: use library to copy
+    pub fn copy_dict(&self, dict_extract_path: &Path, dictionary_id: i32) -> anyhow::Result<()> {
+        let dict_target_path = self.config.dir.dict.join(dictionary_id.to_string());
+        fs::create_dir_all(&dict_target_path).context("Failed to create dict target directory")?;
+
+        let entries =
+            fs::read_dir(dict_extract_path).context("Failed to read extract directory")?;
+
+        let pb = get_progress_bar(entries.count() as u64);
+        let pb = Arc::new(pb);
+
+        let entries =
+            fs::read_dir(dict_extract_path).context("Failed to read extract directory")?;
+        for entry in entries {
+            let entry = entry.context("Failed to read directory entry")?;
+            let source_path = entry.path();
+            let file_name = entry.file_name();
+            let target_path = dict_target_path.join(&file_name);
+
+            pb.set_message(format!("{}", file_name.to_string_lossy()));
+
+            if source_path.is_dir() {
+                fs::create_dir_all(&target_path).context("Failed to create target subdirectory")?;
+                copy(&source_path, &target_path)?;
+            } else {
+                fs::copy(&source_path, &target_path).context("Failed to copy file")?;
+            }
+
+            pb.inc(1);
+        }
+
+        pb.finish_and_clear();
+
+        // Clean up temp directory
+        // fs::remove_dir_all(dict_extract_path).context("Failed to clean up temp directory")?;
+
+        Ok(())
+    }
+}
+
+fn copy(source: &Path, target: &Path) -> anyhow::Result<()> {
+    if !target.exists() {
+        fs::create_dir_all(target).context("Failed to create target directory")?;
+    }
+
+    let entries = fs::read_dir(source).context("Failed to read source directory")?;
+    for entry in entries {
+        let entry = entry.context("Failed to read directory entry")?;
+        let source_path = entry.path();
+        let file_name = entry.file_name();
+        let target_path = target.join(&file_name);
+
+        if source_path.is_dir() {
+            copy(&source_path, &target_path)?;
+        } else {
+            fs::copy(&source_path, &target_path).context("Failed to copy file")?;
+        }
+    }
+
+    Ok(())
 }

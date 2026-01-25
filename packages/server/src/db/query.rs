@@ -13,7 +13,7 @@ impl Db {
         dict: &DictionaryIndex,
         entries: &DictionaryTermBankV3,
         tags: &DictionaryTagBankV3,
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<i32> {
         let mut tx = self.pool.begin().await?;
 
         let row = sqlx::query(
@@ -97,7 +97,7 @@ impl Db {
         }
 
         tx.commit().await?;
-        Ok(())
+        Ok(dictionary_id)
     }
 
     pub async fn _vacuum(&self) -> anyhow::Result<()> {
