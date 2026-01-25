@@ -80,6 +80,7 @@ export function init() {
       const word = words[wordIndex];
 
       if (!word) return;
+      console.log(word.word);
       const dictionaryEntries = await queryClient.fetchQuery({
         ...queries.dictionaryEntries.search(word.word),
       });

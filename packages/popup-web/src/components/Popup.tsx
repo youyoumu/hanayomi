@@ -1,6 +1,7 @@
 import type { DictionaryEntry } from "@repo/server/types/db";
 import type { DetailedDefinition } from "@repo/server/types/dictionary-term-bank-v3";
 import { StructuredContentComponent } from "./StructuredContent";
+import { ImageContent } from "./ImageContent";
 
 export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
   const definitions = props.dictionaryEntries[0]?.definitions;
@@ -19,8 +20,7 @@ export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
     return detailedDefinition.text;
   }
   if (detailedDefinition.type === "image") {
-    //TODO: implement
-    return null;
+    return <ImageContent imageDefinition={detailedDefinition} />;
   }
   if (detailedDefinition.type === "structured-content") {
     return <StructuredContentComponent structuredContent={detailedDefinition.content} />;
