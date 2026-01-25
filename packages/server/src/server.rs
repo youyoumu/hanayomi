@@ -14,6 +14,7 @@ pub async fn serve(config: Arc<Config>) -> anyhow::Result<()> {
     let state = AppState {
         db: db.clone(),
         lexer: lexer.clone(),
+        config: config.clone(),
     };
 
     let app = create_routes(state);

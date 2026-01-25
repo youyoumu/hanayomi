@@ -10,6 +10,7 @@ mod dictionaries;
 mod dictionary_entries;
 mod health;
 mod index;
+mod media;
 mod tokenize;
 
 #[rustfmt::skip]
@@ -25,6 +26,7 @@ pub fn create_routes(state: AppState) -> Router {
         .route("/definition_tags/search", get(definition_tags::search))
         .route("/dictionaries/{dictionary_id}", get(dictionaries::show))
         .route("/tokenize", get(tokenize::handle))
+        .route("/media/{dictionary_id}/{relative_path}", get(media::serve))
         .with_state(state)
         .layer(CatchPanicLayer::new())
         .layer(cors)
