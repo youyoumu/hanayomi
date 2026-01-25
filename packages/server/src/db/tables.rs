@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct Dictionary {
     pub id: i32,
     pub created_at: DateTime<Utc>,
@@ -38,6 +39,7 @@ pub struct Dictionary {
 }
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct DictionaryEntry {
     pub id: i32,
     pub created_at: DateTime<Utc>,
@@ -56,6 +58,7 @@ pub struct DictionaryEntry {
 }
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct DefinitionTag {
     pub id: i32,
     pub created_at: DateTime<Utc>,
