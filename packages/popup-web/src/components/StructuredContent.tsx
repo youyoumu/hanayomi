@@ -219,7 +219,7 @@ function createDataAttribute(data: Record<string, string> | null | undefined) {
   if (!data) return {};
   const result: Record<string, string> = {};
   for (const [key, value] of Object.entries(data)) {
-    result[`data-${key}`] = value;
+    result[`data-sc-${key}`] = value;
   }
   return result;
 }

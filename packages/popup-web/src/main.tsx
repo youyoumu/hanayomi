@@ -5,6 +5,7 @@ import { queries } from "./util/queryKeyFactory";
 import { QueryClient } from "@tanstack/solid-query";
 import { render } from "solid-js/web";
 import { Popup } from "./components/Popup";
+import "./styles/main.css";
 
 class WordIndexer {
   private offsets: number[] = [];
@@ -62,7 +63,17 @@ export function init() {
     },
   });
   const pupup = document.createElement("div");
+  const root = document.createElement("div");
+  const shadow = pupup.attachShadow({ mode: "closed" });
+  if (import.meta.env.DEV) {
+    const tailwind = document.querySelector('style[type="text/css"][data-vite-dev-id]');
+    if (tailwind) {
+      shadow.appendChild(tailwind);
+    }
+  }
+  shadow.appendChild(root);
   document.body.appendChild(pupup);
+
   const scanText = async (e: MouseEvent) => {
     // console.log(e.clientX, e.clientY);
     const result = document.caretPositionFromPoint(e.clientX, e.clientY);
@@ -85,11 +96,11 @@ export function init() {
         ...queries.dictionaryEntries.search(word.word),
       });
 
-      pupup.innerHTML = "";
-      render(() => <Popup dictionaryEntries={dictionaryEntries} />, pupup);
+      root.innerHTML = "";
+      render(() => <Popup dictionaryEntries={dictionaryEntries} />, root);
     }
   };
-  const dScanText = debounce(scanText, 0);
+  const dScanText = debounce(scanText, 1000);
 
   document.addEventListener("mousemove", dScanText);
 }

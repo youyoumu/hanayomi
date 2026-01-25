@@ -28,12 +28,20 @@ function DefinitionRenderer(props: { definition: Definition }) {
 
 export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
   return (
-    <For each={props.dictionaryEntries}>
-      {(entry) => (
-        <For each={entry.definitions}>
-          {(definition) => <DefinitionRenderer definition={definition} />}
-        </For>
-      )}
-    </For>
+    <div
+      style={{
+        height: "400px",
+        width: "600px",
+        overflow: "scroll",
+      }}
+    >
+      <For each={props.dictionaryEntries}>
+        {(entry) => (
+          <For each={entry.definitions}>
+            {(definition) => <DefinitionRenderer definition={definition} />}
+          </For>
+        )}
+      </For>
+    </div>
   );
 }
