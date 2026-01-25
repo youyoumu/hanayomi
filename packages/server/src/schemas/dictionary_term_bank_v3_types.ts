@@ -70,10 +70,7 @@ export type StructuredContentDefinition = {
 /**
  * Deinflection information for terms
  */
-export type Deinflection = {
-  uninflectedTerm: string;
-  inflectionRules: string[];
-};
+export type Deinflection = [uninflectedTerm: string, inflectionRules: string[]];
 
 // Note: inflectedTerm is represented as string[] in TypeScript (type alias in Rust)
 

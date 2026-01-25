@@ -1,21 +1,19 @@
 import type { DictionaryEntry } from "@repo/server/types/db";
-import type { DetailedDefinition } from "@repo/server/types/dictionary-term-bank-v3";
+import type { Definition, DetailedDefinition } from "@repo/server/types/dictionary-term-bank-v3";
 import { StructuredContentComponent } from "./StructuredContent";
 import { ImageContent } from "./ImageContent";
+import { For } from "solid-js";
 
-export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
-  const definitions = props.dictionaryEntries[0]?.definitions;
-  if (!definitions) return null;
-  const definition = definitions[0];
-  if (!definition) return null;
-  if (typeof definition === "string") {
-    return definition;
+function DefinitionRenderer(props: { definition: Definition }) {
+  if (!props.definition) return null;
+  if (typeof props.definition === "string") {
+    return props.definition;
   }
-  if (Array.isArray(definition)) {
-    //TODO: implement
+  if (Array.isArray(props.definition)) {
+    //TODO: implement deinflection
     return null;
   }
-  const detailedDefinition = definition as DetailedDefinition;
+  const detailedDefinition = props.definition as DetailedDefinition;
   if (detailedDefinition.type === "text") {
     return detailedDefinition.text;
   }
@@ -26,4 +24,16 @@ export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
     return <StructuredContentComponent structuredContent={detailedDefinition.content} />;
   }
   return null;
+}
+
+export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
+  return (
+    <For each={props.dictionaryEntries}>
+      {(entry) => (
+        <For each={entry.definitions}>
+          {(definition) => <DefinitionRenderer definition={definition} />}
+        </For>
+      )}
+    </For>
+  );
 }
