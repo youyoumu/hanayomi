@@ -24,6 +24,7 @@ pub fn create_routes(state: AppState) -> Router {
         .route("/health", get(health::status))
         .route("/dictionary_entries/search", get(dictionary_entries::search))
         .route("/definition_tags/search", get(definition_tags::search))
+        .route("/dictionaries", get(dictionaries::index))
         .route("/dictionaries/{dictionary_id}", get(dictionaries::show))
         .route("/tokenize", get(tokenize::handle))
         .route("/media/{dictionary_id}/{relative_path}", get(media::serve))
