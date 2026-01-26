@@ -24,6 +24,7 @@
     "@repo/server": "workspace:*",
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^24.10.1",
+    "daisyui": "^5.5.14",
     "oxfmt": "^0.26.0",
     "oxlint": "^1.41.0",
     "tailwindcss": "^4.1.18",

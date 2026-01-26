@@ -46,12 +46,12 @@ function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JS
   return (
     <div class="flex flex-col gap-1">
       <div class="text-3xl">{props.dictionaryEntry.expression}</div>
-      <div class="flex flex-wrap">
+      <div class="flex flex-wrap gap-1">
         <For each={query}>
           {(query) => {
             return (
               <Show when={query.data}>
-                <div class="bg-blue-300 p-1 rounded-sm text-xs">{query.data?.name}</div>
+                <div class="badge badge-info badge-sm">{query.data?.name}</div>
               </Show>
             );
           }}

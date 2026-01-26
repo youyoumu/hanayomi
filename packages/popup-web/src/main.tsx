@@ -86,6 +86,7 @@ export function init() {
       const wordIndex = wordIndexer.getWordIndex(offset);
       const word = words[wordIndex];
       if (!word) return;
+      console.log("DEBUG[1455]: word=", word);
 
       root.innerHTML = "";
       render(
@@ -98,7 +99,7 @@ export function init() {
       );
     }
   };
-  const dScanText = debounce(scanText, 0);
+  const dScanText = debounce(scanText, 100);
 
   document.addEventListener("mousemove", dScanText);
 }
