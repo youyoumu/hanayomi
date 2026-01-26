@@ -2,7 +2,7 @@ import type { DictionaryEntry } from "@repo/server/types/db";
 import type { Definition, DetailedDefinition } from "@repo/server/types/dictionary-term-bank-v3";
 import { StructuredContentComponent } from "./StructuredContent";
 import { ImageContent } from "./ImageContent";
-import { For } from "solid-js";
+import { For, type JSXElement } from "solid-js";
 import { ShadowRoot } from "./ShadowRoot";
 
 function DefinitionRenderer(props: { definition: Definition }) {
@@ -27,6 +27,15 @@ function DefinitionRenderer(props: { definition: Definition }) {
   return null;
 }
 
+function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JSXElement }) {
+  return (
+    <div>
+      <div class="text-2xl">{props.dictionaryEntry.expression}</div>
+      <div>{props.children}</div>
+    </div>
+  );
+}
+
 export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
   console.log("DEBUG[1439]: dictionaryEntries: DictionaryEntry[]=", props.dictionaryEntries);
   return (
@@ -40,11 +49,13 @@ export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
       <For each={props.dictionaryEntries}>
         {(entry) => (
           //  TODO: fix hardcoded url
-          <ShadowRoot css={`http://localhost:45636/media/${entry.dictionaryId}/styles.css`}>
-            <For each={entry.definitions}>
-              {(definition) => <DefinitionRenderer definition={definition} />}
-            </For>
-          </ShadowRoot>
+          <DefinirionEntry dictionaryEntry={entry}>
+            <ShadowRoot css={`http://localhost:45636/media/${entry.dictionaryId}/styles.css`}>
+              <For each={entry.definitions}>
+                {(definition) => <DefinitionRenderer definition={definition} />}
+              </For>
+            </ShadowRoot>
+          </DefinirionEntry>
         )}
       </For>
     </div>

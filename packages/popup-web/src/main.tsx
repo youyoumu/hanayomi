@@ -54,6 +54,36 @@ class WordIndexer {
   }
 }
 
+function setupTailwind(shadow: ShadowRoot) {
+  if (import.meta.env.DEV) {
+    const syncStyles = () => {
+      const tailwind = document.querySelector('style[type="text/css"][data-vite-dev-id]');
+      if (tailwind) {
+        let existingStyle = shadow.querySelector("style[data-shadow-sync]");
+
+        if (!existingStyle) {
+          existingStyle = document.createElement("style");
+          existingStyle.setAttribute("data-shadow-sync", "true");
+          shadow.appendChild(existingStyle);
+        }
+        existingStyle.textContent = tailwind.textContent;
+      }
+    };
+
+    syncStyles();
+
+    const observer = new MutationObserver(() => {
+      syncStyles();
+    });
+
+    observer.observe(document.head, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  }
+}
+
 export function init() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -65,12 +95,7 @@ export function init() {
   const pupup = document.createElement("div");
   const root = document.createElement("div");
   const shadow = pupup.attachShadow({ mode: "closed" });
-  if (import.meta.env.DEV) {
-    const tailwind = document.querySelector('style[type="text/css"][data-vite-dev-id]');
-    if (tailwind) {
-      shadow.appendChild(tailwind);
-    }
-  }
+  setupTailwind(shadow);
   shadow.appendChild(root);
   document.body.appendChild(pupup);
 
