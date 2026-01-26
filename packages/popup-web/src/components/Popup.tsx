@@ -1,9 +1,11 @@
-import type { DictionaryEntry } from "@repo/server/types/db";
+import type { DictionaryEntry, DefinitionTag } from "@repo/server/types/db";
 import type { Definition, DetailedDefinition } from "@repo/server/types/dictionary-term-bank-v3";
 import { StructuredContentComponent } from "./StructuredContent";
 import { ImageContent } from "./ImageContent";
 import { For, type JSXElement } from "solid-js";
 import { ShadowRoot } from "./ShadowRoot";
+import { useQueries } from "@tanstack/solid-query";
+import { queries } from "../util/queryKeyFactory";
 
 function DefinitionRenderer(props: { definition: Definition }) {
   if (!props.definition) return null;
@@ -28,16 +30,34 @@ function DefinitionRenderer(props: { definition: Definition }) {
 }
 
 function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JSXElement }) {
+  const definitionsTags = props.dictionaryEntry.definitionTags.split(" ");
+  const query = useQueries(() => ({
+    queries: definitionsTags.map((tagName) => ({
+      ...queries.definitionTags.search(tagName),
+      select: (data: DefinitionTag[]) => {
+        return data.find((tag) => tag.dictionaryId === props.dictionaryEntry.dictionaryId);
+      },
+    })),
+  }));
+
+  console.log("DEBUG[1446]: query=", query);
+
   return (
-    <div>
+    <div class="flex flex-col gap-1">
       <div class="text-3xl">{props.dictionaryEntry.expression}</div>
+      <div class="flex flex-wrap">
+        <For each={query}>
+          {(query) => {
+            return <div class="bg-blue-300 p-1 rounded-sm text-xs">{query.data?.name}</div>;
+          }}
+        </For>
+      </div>
       <div>{props.children}</div>
     </div>
   );
 }
 
 export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
-  console.log("DEBUG[1439]: dictionaryEntries: DictionaryEntry[]=", props.dictionaryEntries);
   return (
     <div class="p-2 w-[600px] h-[400px] overflow-scroll">
       <For each={props.dictionaryEntries}>

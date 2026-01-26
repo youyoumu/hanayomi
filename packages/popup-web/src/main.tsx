@@ -2,7 +2,7 @@
 import { debounce } from "es-toolkit";
 import type { Word } from "@repo/server/types/mecab-ipadic";
 import { queries } from "./util/queryKeyFactory";
-import { QueryClient } from "@tanstack/solid-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 import { render } from "solid-js/web";
 import { Popup } from "./components/Popup";
 import "./styles/main.css";
@@ -93,7 +93,14 @@ export function init() {
       });
 
       root.innerHTML = "";
-      render(() => <Popup dictionaryEntries={dictionaryEntries} />, root);
+      render(
+        () => (
+          <QueryClientProvider client={queryClient}>
+            <Popup dictionaryEntries={dictionaryEntries} />
+          </QueryClientProvider>
+        ),
+        root,
+      );
     }
   };
   const dScanText = debounce(scanText, 1000);
