@@ -1,5 +1,9 @@
 use crate::util::state::AppState;
-use axum::{Router, http::HeaderValue, routing::get};
+use axum::{
+    Router,
+    http::HeaderValue,
+    routing::{delete, get},
+};
 use tower_http::{
     catch_panic::CatchPanicLayer,
     cors::{Any, CorsLayer},
@@ -26,6 +30,7 @@ pub fn create_routes(state: AppState) -> Router {
         .route("/definition_tags/search", get(definition_tags::search))
         .route("/dictionaries", get(dictionaries::index))
         .route("/dictionaries/{dictionary_id}", get(dictionaries::show))
+        .route("/dictionaries/{dictionary_id}", delete(dictionaries::destroy))
         .route("/tokenize", get(tokenize::handle))
         .route("/media/{dictionary_id}/{relative_path}", get(media::serve))
         .with_state(state)

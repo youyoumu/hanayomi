@@ -143,6 +143,7 @@ impl Db {
         Ok(row)
     }
 
+    //TODO: delete dictionary directory after delete
     pub async fn query_delete_dictionary(
         &self,
         dictionary_id: i32,
