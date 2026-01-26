@@ -1,7 +1,7 @@
 import { createQueryKeyStore } from "@lukemorales/query-key-factory";
 import ky from "ky";
 
-import type { Word } from "@repo/server/types/mecab-ipadic";
+import type { Lexeme } from "@repo/server/types/mecab-ipadic";
 import type { DefinitionTag, DictionaryEntry } from "@repo/server/types/db";
 
 type Result<T> = {
@@ -19,7 +19,7 @@ export const queries = createQueryKeyStore({
       queryKey: [{ sentence }],
       queryFn: async () => {
         const result = await api
-          .get<Result<Word[]>>(`tokenize`, { searchParams: { sentence } })
+          .get<Result<Lexeme[]>>(`tokenize`, { searchParams: { sentence } })
           .json();
         return result.data;
       },

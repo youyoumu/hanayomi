@@ -1,7 +1,7 @@
 use crate::util::{
     response::{HandlerResult, RejectionResponse, success},
     state::AppState,
-    ve::mecab_ipadic::Word,
+    ve::mecab_ipadic::Lexeme,
 };
 use axum::extract::{Query, State};
 use axum_extra::extract::WithRejection;
@@ -17,7 +17,7 @@ pub struct HandleQueryParams {
 pub async fn handle(
     State(state): State<AppState>,
     WithRejection(Query(params), _): WithRejection<Query<HandleQueryParams>, RejectionResponse>,
-) -> HandlerResult<Vec<Word>> {
+) -> HandlerResult<Vec<Lexeme>> {
     params.validate()?;
     let sentence = params.sentence;
 

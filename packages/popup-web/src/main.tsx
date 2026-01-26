@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { debounce, uniq } from "es-toolkit";
-import type { Word } from "@repo/server/types/mecab-ipadic";
+import type { Lexeme } from "@repo/server/types/mecab-ipadic";
 import { queries } from "./util/queryKeyFactory";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 import { render } from "solid-js/web";
@@ -10,10 +10,10 @@ import { setupTailwind } from "./util/dev";
 
 class WordLexer {
   #offsets: number[] = [];
-  #words: Word[];
+  #lexemes: Lexeme[];
 
-  static cache = new WeakMap<Word[], WordLexer>();
-  static new(words: Word[]): WordLexer {
+  static cache = new WeakMap<Lexeme[], WordLexer>();
+  static new(words: Lexeme[]): WordLexer {
     const cache = WordLexer.cache;
     let wordIndexer: WordLexer;
     if (cache.has(words)) {
@@ -25,8 +25,8 @@ class WordLexer {
     return wordIndexer;
   }
 
-  constructor(words: Word[]) {
-    this.#words = words;
+  constructor(words: Lexeme[]) {
+    this.#lexemes = words;
     let currentLength = 0;
     for (const w of words) {
       this.#offsets.push(currentLength);
@@ -41,7 +41,7 @@ class WordLexer {
     while (low <= high) {
       const mid = Math.floor((low + high) / 2);
       const start = this.#offsets[mid]!;
-      const end = start + this.#words[mid]!.word.length;
+      const end = start + this.#lexemes[mid]!.word.length;
 
       if (globalIndex >= start && globalIndex < end) {
         return mid;
@@ -54,7 +54,7 @@ class WordLexer {
     return -1;
   }
 
-  getFirstTokenLemma(word: Word) {
+  getFirstTokenLemma(word: Lexeme) {
     return word.tokens[0]?.lemma;
   }
 }
@@ -87,6 +87,7 @@ export function init() {
       });
 
       const wordLexer = WordLexer.new(words);
+      console.log("DEBUG[1458]: words=", words);
       const wordIndex = wordLexer.getWordIndex(offset);
       const word = words[wordIndex];
       if (!word) return;

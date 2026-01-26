@@ -215,17 +215,17 @@ const SA: &str = "さ";
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Word {
+pub struct Lexeme {
     pub word: String,
     pub lemma: Option<String>, // dictionary form
     pub part_of_speech: PartOfSpeech,
     pub tokens: Vec<PreparedToken>,
-    pub extra: WordExtra,
+    pub extra: LexemeExtra,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct WordExtra {
+pub struct LexemeExtra {
     pub reading: String,
     pub transcription: String,
     pub grammar: Option<Grammar>,
@@ -307,8 +307,8 @@ fn sanitize_asterisk(value: &str) -> Option<String> {
     }
 }
 
-pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
-    let mut words: Vec<Word> = Vec::new();
+pub fn parse_into_lexemes(tokens: Vec<PreparedToken>) -> Result<Vec<Lexeme>> {
+    let mut lexemes: Vec<Lexeme> = Vec::new();
     let mut iter = tokens.iter().peekable();
     let mut previous: Option<PreparedToken> = None;
 
@@ -394,8 +394,8 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
                     POS::Kazu => {
                         pos = Some(PartOfSpeech::Number);
                         #[allow(clippy::len_zero)]
-                        if words.len() > 0
-                            && words
+                        if lexemes.len() > 0
+                            && lexemes
                                 .last()
                                 .is_some_and(|w| w.part_of_speech == PartOfSpeech::Number)
                         {
@@ -501,8 +501,8 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
         let pos = pos.unwrap();
 
         #[allow(clippy::len_zero)]
-        if attach_to_previous && words.len() > 0 {
-            let last = words.last_mut().unwrap();
+        if attach_to_previous && lexemes.len() > 0 {
+            let last = lexemes.last_mut().unwrap();
 
             let token = token.clone();
 
@@ -526,12 +526,12 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
             let token = token.clone();
             let token2 = token.clone();
 
-            let mut word = Word {
+            let mut lexeme = Lexeme {
                 word: token.literal,
                 lemma: sanitize_asterisk(&token.lemma),
                 part_of_speech: pos,
                 tokens: vec![token2],
-                extra: WordExtra {
+                extra: LexemeExtra {
                     reading: token.reading,
                     transcription: token.hatsuon,
                     grammar,
@@ -544,25 +544,25 @@ pub fn parse_into_words(tokens: Vec<PreparedToken>) -> Result<Vec<Word>> {
                 };
 
                 let following = following.clone();
-                word.word.push_str(&following.literal);
-                word.extra.reading.push_str(&following.reading);
-                word.extra.transcription.push_str(&following.hatsuon);
+                lexeme.word.push_str(&following.literal);
+                lexeme.extra.reading.push_str(&following.reading);
+                lexeme.extra.transcription.push_str(&following.hatsuon);
                 #[allow(clippy::collapsible_if)]
                 if eat_lemma {
-                    if let Some(ref mut lemma) = word.lemma {
+                    if let Some(ref mut lemma) = lexeme.lemma {
                         lemma.push_str(&following.lemma)
                     }
                 }
 
-                word.tokens.push(following);
+                lexeme.tokens.push(following);
             }
 
-            words.push(word);
+            lexemes.push(lexeme);
         }
         previous = Some(token.clone());
     }
 
-    Ok(words)
+    Ok(lexemes)
 }
 
 #[cfg(test)]
@@ -648,14 +648,14 @@ mod test {
         println!("Prepared Tokens");
         println!("{:#?}", prepared_tokens);
 
-        let words = parse_into_words(prepared_tokens).unwrap();
-        println!("Words");
-        println!("{:#?}", words);
+        let lexemes = parse_into_lexemes(prepared_tokens).unwrap();
+        println!("Lexemes");
+        println!("{:#?}", lexemes);
 
         println!("Final sentence splitting");
-        let sentence = words
+        let sentence = lexemes
             .into_iter()
-            .map(|w| w.word)
+            .map(|lexeme| lexeme.word)
             .collect::<Vec<String>>()
             .join(" ");
         println!("{}", sentence);

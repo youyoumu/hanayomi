@@ -2,9 +2,9 @@ use std::fs::File;
 use vibrato::Dictionary;
 use vibrato::Tokenizer;
 
+use crate::util::ve::mecab_ipadic::Lexeme;
 use crate::util::ve::mecab_ipadic::VibratoToken;
-use crate::util::ve::mecab_ipadic::Word;
-use crate::util::ve::mecab_ipadic::parse_into_words;
+use crate::util::ve::mecab_ipadic::parse_into_lexemes;
 use crate::util::ve::mecab_ipadic::prepare_tokens;
 
 pub struct Lexer {
@@ -21,13 +21,13 @@ impl Lexer {
         Ok(lexer)
     }
 
-    pub fn tokenize(&self, text: String) -> anyhow::Result<Vec<Word>> {
+    pub fn tokenize(&self, text: String) -> anyhow::Result<Vec<Lexeme>> {
         let mut worker = self.tokenizer.new_worker();
         worker.reset_sentence(text);
         worker.tokenize();
         let tokens: Vec<VibratoToken> = worker.token_iter().map(|t| t.into()).collect();
         let prepared_tokens = prepare_tokens(tokens)?;
-        let words = parse_into_words(prepared_tokens)?;
-        Ok(words)
+        let lexemes = parse_into_lexemes(prepared_tokens)?;
+        Ok(lexemes)
     }
 }

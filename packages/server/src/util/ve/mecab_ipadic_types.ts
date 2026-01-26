@@ -106,7 +106,7 @@ export type Grammar =
 /**
  * Additional linguistic information for a word
  */
-export interface WordExtra {
+export interface LexemeExtra {
   /** Reading pronunciation (hiragana) */
   reading: string;
   /** Phonetic transcription */
@@ -118,7 +118,7 @@ export interface WordExtra {
 /**
  * A complete analyzed word with tokens and metadata
  */
-export interface Word {
+export interface Lexeme {
   /** The surface form of the word */
   word: string;
   /** Dictionary form (lemma) - may be null if same as word */
@@ -128,7 +128,7 @@ export interface Word {
   /** All tokens that make up this word */
   tokens: PreparedToken[];
   /** Additional linguistic information */
-  extra: WordExtra;
+  extra: LexemeExtra;
 }
 
 /**
