@@ -53,8 +53,8 @@ enum DictCommands {
         dictionary: String,
     },
 
-    #[command(about = "Check the dictionary")]
-    Check {
+    #[command(about = "List all dictionaries")]
+    List {
         #[arg(long)]
         workdir: Option<String>,
     },
@@ -104,9 +104,12 @@ pub async fn cli() -> anyhow::Result<()> {
                 let dict = Dict::new(config.clone());
                 dict.parse_dict(dictionary, db).await?;
             }
-            DictCommands::Check { workdir } => {
-                println!("Checking dictionary...");
-                let _config = Config::new(workdir, host, port)?;
+            DictCommands::List { workdir } => {
+                let config = Config::new(workdir, host, port)?;
+                let config = Arc::new(config);
+                let db = Db::new(config.clone()).await?;
+                let dictionaries = db.query_dictionaries().await?;
+                println!("{}", json!(dictionaries));
             }
             DictCommands::Query {
                 workdir,
