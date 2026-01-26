@@ -1,63 +1,12 @@
 /* @refresh reload */
 import { debounce, uniq } from "es-toolkit";
-import type { Lexeme } from "@repo/server/types/mecab-ipadic";
 import { queries } from "./util/queryKeyFactory";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 import { render } from "solid-js/web";
 import { Popup } from "./components/Popup";
 import "./styles/main.css";
 import { setupTailwind } from "./util/dev";
-
-class WordLexer {
-  #offsets: number[] = [];
-  #lexemes: Lexeme[];
-
-  static cache = new WeakMap<Lexeme[], WordLexer>();
-  static new(words: Lexeme[]): WordLexer {
-    const cache = WordLexer.cache;
-    let wordIndexer: WordLexer;
-    if (cache.has(words)) {
-      wordIndexer = cache.get(words)!;
-    } else {
-      wordIndexer = new WordLexer(words);
-      cache.set(words, wordIndexer);
-    }
-    return wordIndexer;
-  }
-
-  constructor(words: Lexeme[]) {
-    this.#lexemes = words;
-    let currentLength = 0;
-    for (const w of words) {
-      this.#offsets.push(currentLength);
-      currentLength += w.word.length;
-    }
-  }
-
-  getWordIndex(globalIndex: number): number {
-    let low = 0;
-    let high = this.#offsets.length - 1;
-
-    while (low <= high) {
-      const mid = Math.floor((low + high) / 2);
-      const start = this.#offsets[mid]!;
-      const end = start + this.#lexemes[mid]!.word.length;
-
-      if (globalIndex >= start && globalIndex < end) {
-        return mid;
-      } else if (globalIndex < start) {
-        high = mid - 1;
-      } else {
-        low = mid + 1;
-      }
-    }
-    return -1;
-  }
-
-  getFirstTokenLemma(word: Lexeme) {
-    return word.tokens[0]?.lemma;
-  }
-}
+import { LexemesProcessor } from "./util/lexeme";
 
 export function init() {
   const queryClient = new QueryClient({
@@ -82,17 +31,17 @@ export function init() {
       const offset = result.offset;
       const text = node.data;
 
-      const words = await queryClient.fetchQuery({
+      const lexemes = await queryClient.fetchQuery({
         ...queries.tokenize.detail(text),
       });
 
-      const wordLexer = WordLexer.new(words);
-      console.log("DEBUG[1458]: words=", words);
-      const wordIndex = wordLexer.getWordIndex(offset);
-      const word = words[wordIndex];
-      if (!word) return;
-      const firstTokenLemma = wordLexer.getFirstTokenLemma(word);
-      const expressions = uniq([word.word, firstTokenLemma].filter(Boolean)) as string[];
+      const lexemesProcessor = LexemesProcessor.new(lexemes);
+      console.log("DEBUG[1458]: lexemes=", lexemes);
+      const lexemeIndex = lexemesProcessor.getLexemeIndex(offset);
+      const lexeme = lexemes[lexemeIndex];
+      if (!lexeme) return;
+      const firstTokenLemma = lexemesProcessor.getFirstTokenLemma(lexeme);
+      const expressions = uniq([lexeme.word, firstTokenLemma].filter(Boolean)) as string[];
 
       root.innerHTML = "";
       render(
