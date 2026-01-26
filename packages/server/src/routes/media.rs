@@ -2,7 +2,7 @@ use crate::util::{response::ErrorResponse, state::AppState};
 use axum::{
     body::Body,
     extract::{Path, State},
-    http::{Response, StatusCode},
+    http::{header, Response, StatusCode},
 };
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
@@ -30,6 +30,7 @@ pub async fn serve(
 
     let response = Response::builder()
         .status(StatusCode::OK)
+        .header(header::CACHE_CONTROL, "public, max-age=60")
         .body(Body::from(contents))
         .map_err(|e| ErrorResponse {
             error: anyhow::anyhow!("Failed to create response: {}", e),
