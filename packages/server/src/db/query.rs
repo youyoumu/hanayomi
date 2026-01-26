@@ -143,6 +143,22 @@ impl Db {
         Ok(row)
     }
 
+    pub async fn query_delete_dictionary(
+        &self,
+        dictionary_id: i32,
+    ) -> anyhow::Result<Option<Dictionary>> {
+        let row: Option<Dictionary> = sqlx::query_as(
+            r#"--sql
+            DELETE FROM dictionary WHERE id = ?
+            RETURNING *
+            "#,
+        )
+        .bind(dictionary_id)
+        .fetch_optional(&self.pool)
+        .await?;
+        Ok(row)
+    }
+
     pub async fn query_definition_tag_by(
         &self,
         name: String,

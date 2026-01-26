@@ -59,6 +59,15 @@ enum DictCommands {
         workdir: Option<String>,
     },
 
+    #[command(about = "List all dictionaries")]
+    Delete {
+        #[arg(long)]
+        workdir: Option<String>,
+
+        #[arg(long)]
+        id: i32,
+    },
+
     #[command(about = "Query the dictionary")]
     Query {
         #[arg(long)]
@@ -110,6 +119,13 @@ pub async fn cli() -> anyhow::Result<()> {
                 let db = Db::new(config.clone()).await?;
                 let dictionaries = db.query_dictionaries().await?;
                 println!("{}", json!(dictionaries));
+            }
+            DictCommands::Delete { workdir, id } => {
+                let config = Config::new(workdir, host, port)?;
+                let config = Arc::new(config);
+                let db = Db::new(config.clone()).await?;
+                let dictionary = db.query_delete_dictionary(id).await?;
+                println!("{}", json!(dictionary));
             }
             DictCommands::Query {
                 workdir,
