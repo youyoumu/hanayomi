@@ -30,7 +30,7 @@ function DefinitionRenderer(props: { definition: Definition }) {
 function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JSXElement }) {
   return (
     <div>
-      <div class="text-2xl">{props.dictionaryEntry.expression}</div>
+      <div class="text-3xl">{props.dictionaryEntry.expression}</div>
       <div>{props.children}</div>
     </div>
   );
@@ -39,13 +39,7 @@ function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JS
 export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
   console.log("DEBUG[1439]: dictionaryEntries: DictionaryEntry[]=", props.dictionaryEntries);
   return (
-    <div
-      style={{
-        height: "400px",
-        width: "600px",
-        overflow: "scroll",
-      }}
-    >
+    <div class="p-2 w-[600px] h-[400px] overflow-scroll">
       <For each={props.dictionaryEntries}>
         {(entry) => (
           //  TODO: fix hardcoded url

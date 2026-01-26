@@ -6,6 +6,7 @@ import { QueryClient } from "@tanstack/solid-query";
 import { render } from "solid-js/web";
 import { Popup } from "./components/Popup";
 import "./styles/main.css";
+import { setupTailwind } from "./util/dev";
 
 class WordIndexer {
   private offsets: number[] = [];
@@ -51,36 +52,6 @@ class WordIndexer {
       }
     }
     return -1;
-  }
-}
-
-function setupTailwind(shadow: ShadowRoot) {
-  if (import.meta.env.DEV) {
-    const syncStyles = () => {
-      const tailwind = document.querySelector('style[type="text/css"][data-vite-dev-id]');
-      if (tailwind) {
-        let existingStyle = shadow.querySelector("style[data-shadow-sync]");
-
-        if (!existingStyle) {
-          existingStyle = document.createElement("style");
-          existingStyle.setAttribute("data-shadow-sync", "true");
-          shadow.appendChild(existingStyle);
-        }
-        existingStyle.textContent = tailwind.textContent;
-      }
-    };
-
-    syncStyles();
-
-    const observer = new MutationObserver(() => {
-      syncStyles();
-    });
-
-    observer.observe(document.head, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
   }
 }
 
