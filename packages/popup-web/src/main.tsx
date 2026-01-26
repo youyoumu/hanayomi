@@ -98,7 +98,7 @@ export function init() {
       );
     }
   };
-  const dScanText = debounce(scanText, 1000);
+  const dScanText = debounce(scanText, 0);
 
   document.addEventListener("mousemove", dScanText);
 }

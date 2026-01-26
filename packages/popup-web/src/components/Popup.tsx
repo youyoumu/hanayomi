@@ -30,7 +30,10 @@ function DefinitionRenderer(props: { definition: Definition }) {
 }
 
 function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JSXElement }) {
-  const definitionsTags = props.dictionaryEntry.definitionTags.split(" ");
+  const definitionsTags = props.dictionaryEntry.definitionTags
+    .split(" ")
+    .map((tagName) => tagName.trim())
+    .filter(Boolean);
   const query = useQueries(() => ({
     queries: definitionsTags.map((tagName) => ({
       ...queries.definitionTags.search(tagName),
