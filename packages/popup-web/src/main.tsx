@@ -1,5 +1,5 @@
 /* @refresh reload */
-import { debounce } from "es-toolkit";
+import { debounce, uniq } from "es-toolkit";
 import type { Word } from "@repo/server/types/mecab-ipadic";
 import { queries } from "./util/queryKeyFactory";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
@@ -8,40 +8,40 @@ import { Popup } from "./components/Popup";
 import "./styles/main.css";
 import { setupTailwind } from "./util/dev";
 
-class WordIndexer {
-  private offsets: number[] = [];
-  private words: Word[];
+class WordLexer {
+  #offsets: number[] = [];
+  #words: Word[];
 
-  static cache = new WeakMap<Word[], WordIndexer>();
-  static new(words: Word[]): WordIndexer {
-    const cache = WordIndexer.cache;
-    let wordIndexer: WordIndexer;
+  static cache = new WeakMap<Word[], WordLexer>();
+  static new(words: Word[]): WordLexer {
+    const cache = WordLexer.cache;
+    let wordIndexer: WordLexer;
     if (cache.has(words)) {
       wordIndexer = cache.get(words)!;
     } else {
-      wordIndexer = new WordIndexer(words);
+      wordIndexer = new WordLexer(words);
       cache.set(words, wordIndexer);
     }
     return wordIndexer;
   }
 
   constructor(words: Word[]) {
-    this.words = words;
+    this.#words = words;
     let currentLength = 0;
     for (const w of words) {
-      this.offsets.push(currentLength);
+      this.#offsets.push(currentLength);
       currentLength += w.word.length;
     }
   }
 
-  public getWordIndex(globalIndex: number): number {
+  getWordIndex(globalIndex: number): number {
     let low = 0;
-    let high = this.offsets.length - 1;
+    let high = this.#offsets.length - 1;
 
     while (low <= high) {
       const mid = Math.floor((low + high) / 2);
-      const start = this.offsets[mid]!;
-      const end = start + this.words[mid]!.word.length;
+      const start = this.#offsets[mid]!;
+      const end = start + this.#words[mid]!.word.length;
 
       if (globalIndex >= start && globalIndex < end) {
         return mid;
@@ -52,6 +52,10 @@ class WordIndexer {
       }
     }
     return -1;
+  }
+
+  getFirstTokenLemma(word: Word) {
+    return word.tokens[0]?.lemma;
   }
 }
 
@@ -82,17 +86,18 @@ export function init() {
         ...queries.tokenize.detail(text),
       });
 
-      const wordIndexer = WordIndexer.new(words);
-      const wordIndex = wordIndexer.getWordIndex(offset);
+      const wordLexer = WordLexer.new(words);
+      const wordIndex = wordLexer.getWordIndex(offset);
       const word = words[wordIndex];
       if (!word) return;
-      console.log("DEBUG[1455]: word=", word);
+      const firstTokenLemma = wordLexer.getFirstTokenLemma(word);
+      const expressions = uniq([word.word, firstTokenLemma].filter(Boolean)) as string[];
 
       root.innerHTML = "";
       render(
         () => (
           <QueryClientProvider client={queryClient}>
-            <Popup expression={word.word} />
+            <Popup expressions={expressions} />
           </QueryClientProvider>
         ),
         root,

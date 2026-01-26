@@ -4,7 +4,7 @@ import { StructuredContentComponent } from "./StructuredContent";
 import { ImageContent } from "./ImageContent";
 import { For, Show, type JSXElement } from "solid-js";
 import { ShadowRoot } from "./ShadowRoot";
-import { useQueries, useQuery } from "@tanstack/solid-query";
+import { useQueries } from "@tanstack/solid-query";
 import { queries } from "../util/queryKeyFactory";
 
 function DefinitionRenderer(props: { definition: Definition }) {
@@ -51,7 +51,7 @@ function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JS
           {(query) => {
             return (
               <Show when={query.data}>
-                <div class="badge badge-info badge-sm">{query.data?.name}</div>
+                <div class="badge badge-info badge-sm font-bold">{query.data?.name}</div>
               </Show>
             );
           }}
@@ -62,27 +62,31 @@ function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JS
   );
 }
 
-export function Popup(props: { expression: string }) {
-  const query = useQuery(() => ({
-    ...queries.dictionaryEntries.search(props.expression),
+export function Popup(props: { expressions: string[] }) {
+  const query = useQueries(() => ({
+    queries: props.expressions.map((expression) => ({
+      ...queries.dictionaryEntries.search(expression),
+    })),
   }));
 
   return (
-    <Show when={query.data}>
-      <div class="p-2 w-[600px] h-[400px] overflow-scroll">
-        <For each={query.data}>
-          {(entry) => (
-            //  TODO: fix hardcoded url
-            <DefinirionEntry dictionaryEntry={entry}>
-              <ShadowRoot css={`http://localhost:45636/media/${entry.dictionaryId}/styles.css`}>
-                <For each={entry.definitions}>
-                  {(definition) => <DefinitionRenderer definition={definition} />}
-                </For>
-              </ShadowRoot>
-            </DefinirionEntry>
-          )}
-        </For>
-      </div>
-    </Show>
+    <div class="p-2 w-[600px] h-[400px] overflow-scroll">
+      <For each={query}>
+        {(query) => (
+          <For each={query.data}>
+            {(entry) => (
+              //  TODO: fix hardcoded url
+              <DefinirionEntry dictionaryEntry={entry}>
+                <ShadowRoot css={`http://localhost:45636/media/${entry.dictionaryId}/styles.css`}>
+                  <For each={entry.definitions}>
+                    {(definition) => <DefinitionRenderer definition={definition} />}
+                  </For>
+                </ShadowRoot>
+              </DefinirionEntry>
+            )}
+          </For>
+        )}
+      </For>
+    </div>
   );
 }
