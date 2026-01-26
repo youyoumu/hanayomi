@@ -46,6 +46,16 @@ export class LexemesProcessor {
     return -1;
   }
 
+  getWordClipped(globalIndex: number): string | null {
+    const index = this.getLexemeIndex(globalIndex);
+    if (index === -1) return null;
+
+    const lexeme = this.#lexemes[index]!;
+    const startOffset = this.#offsets[index]!;
+    const relativeOffset = globalIndex - startOffset;
+    return lexeme.word.slice(relativeOffset);
+  }
+
   getFirstTokenLemma(word: Lexeme) {
     return word.tokens[0]?.lemma;
   }

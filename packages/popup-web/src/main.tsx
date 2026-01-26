@@ -36,12 +36,25 @@ export function init() {
       });
 
       const lexemesProcessor = LexemesProcessor.new(lexemes);
-      console.log("DEBUG[1458]: lexemes=", lexemes);
       const lexemeIndex = lexemesProcessor.getLexemeIndex(offset);
       const lexeme = lexemes[lexemeIndex];
       if (!lexeme) return;
+
       const firstTokenLemma = lexemesProcessor.getFirstTokenLemma(lexeme);
-      const expressions = uniq([lexeme.word, firstTokenLemma].filter(Boolean)) as string[];
+
+      const wordClipped = lexemesProcessor.getWordClipped(offset);
+      const lexemes2 = wordClipped
+        ? await queryClient.fetchQuery({
+            ...queries.tokenize.detail(wordClipped),
+          })
+        : [];
+      const lexeme2 = lexemes2[0];
+      const lexemesProcessor2 = LexemesProcessor.new(lexemes2);
+      const firstTokenLemma2 = lexeme2 ? lexemesProcessor2.getFirstTokenLemma(lexeme2) : null;
+
+      const expressions = uniq(
+        [firstTokenLemma2, lexeme.word, firstTokenLemma].filter(Boolean),
+      ) as string[];
 
       root.innerHTML = "";
       render(
