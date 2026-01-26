@@ -2,9 +2,9 @@ import type { DictionaryEntry, DefinitionTag } from "@repo/server/types/db";
 import type { Definition, DetailedDefinition } from "@repo/server/types/dictionary-term-bank-v3";
 import { StructuredContentComponent } from "./StructuredContent";
 import { ImageContent } from "./ImageContent";
-import { For, type JSXElement } from "solid-js";
+import { For, Show, type JSXElement } from "solid-js";
 import { ShadowRoot } from "./ShadowRoot";
-import { useQueries } from "@tanstack/solid-query";
+import { useQueries, useQuery } from "@tanstack/solid-query";
 import { queries } from "../util/queryKeyFactory";
 
 function DefinitionRenderer(props: { definition: Definition }) {
@@ -40,15 +40,17 @@ function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JS
     })),
   }));
 
-  console.log("DEBUG[1446]: query=", query);
-
   return (
     <div class="flex flex-col gap-1">
       <div class="text-3xl">{props.dictionaryEntry.expression}</div>
       <div class="flex flex-wrap">
         <For each={query}>
           {(query) => {
-            return <div class="bg-blue-300 p-1 rounded-sm text-xs">{query.data?.name}</div>;
+            return (
+              <Show when={query.data}>
+                <div class="bg-blue-300 p-1 rounded-sm text-xs">{query.data?.name}</div>
+              </Show>
+            );
           }}
         </For>
       </div>
@@ -57,21 +59,27 @@ function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JS
   );
 }
 
-export function Popup(props: { dictionaryEntries: DictionaryEntry[] }) {
+export function Popup(props: { expression: string }) {
+  const query = useQuery(() => ({
+    ...queries.dictionaryEntries.search(props.expression),
+  }));
+
   return (
-    <div class="p-2 w-[600px] h-[400px] overflow-scroll">
-      <For each={props.dictionaryEntries}>
-        {(entry) => (
-          //  TODO: fix hardcoded url
-          <DefinirionEntry dictionaryEntry={entry}>
-            <ShadowRoot css={`http://localhost:45636/media/${entry.dictionaryId}/styles.css`}>
-              <For each={entry.definitions}>
-                {(definition) => <DefinitionRenderer definition={definition} />}
-              </For>
-            </ShadowRoot>
-          </DefinirionEntry>
-        )}
-      </For>
-    </div>
+    <Show when={query.data}>
+      <div class="p-2 w-[600px] h-[400px] overflow-scroll">
+        <For each={query.data}>
+          {(entry) => (
+            //  TODO: fix hardcoded url
+            <DefinirionEntry dictionaryEntry={entry}>
+              <ShadowRoot css={`http://localhost:45636/media/${entry.dictionaryId}/styles.css`}>
+                <For each={entry.definitions}>
+                  {(definition) => <DefinitionRenderer definition={definition} />}
+                </For>
+              </ShadowRoot>
+            </DefinirionEntry>
+          )}
+        </For>
+      </div>
+    </Show>
   );
 }

@@ -85,18 +85,13 @@ export function init() {
       const wordIndexer = WordIndexer.new(words);
       const wordIndex = wordIndexer.getWordIndex(offset);
       const word = words[wordIndex];
-
       if (!word) return;
-      console.log(word.word);
-      const dictionaryEntries = await queryClient.fetchQuery({
-        ...queries.dictionaryEntries.search(word.word),
-      });
 
       root.innerHTML = "";
       render(
         () => (
           <QueryClientProvider client={queryClient}>
-            <Popup dictionaryEntries={dictionaryEntries} />
+            <Popup expression={word.word} />
           </QueryClientProvider>
         ),
         root,
