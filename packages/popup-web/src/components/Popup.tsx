@@ -2,10 +2,18 @@ import type { DictionaryEntry, DefinitionTag } from "@repo/server/types/db";
 import type { Definition, DetailedDefinition } from "@repo/server/types/dictionary-term-bank-v3";
 import { StructuredContentComponent } from "./StructuredContent";
 import { ImageContent } from "./ImageContent";
-import { For, Show, type JSXElement } from "solid-js";
+import { createResource, For, type JSXElement } from "solid-js";
 import { ShadowRoot } from "./ShadowRoot";
-import { useQueries } from "@tanstack/solid-query";
-import { queries } from "../util/queryKeyFactory";
+import ky from "ky";
+
+type Result<T> = {
+  result: "success";
+  data: T;
+};
+
+const api = ky.create({
+  prefixUrl: "http://localhost:45636",
+});
 
 function DefinitionRenderer(props: { definition: Definition }) {
   if (!props.definition) return null;
@@ -30,30 +38,32 @@ function DefinitionRenderer(props: { definition: Definition }) {
 }
 
 function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JSXElement }) {
-  const definitionsTags = props.dictionaryEntry.definitionTags
-    .split(" ")
-    .map((tagName) => tagName.trim())
-    .filter(Boolean);
-  const query = useQueries(() => ({
-    queries: definitionsTags.map((tagName) => ({
-      ...queries.definitionTags.search(tagName),
-      select: (data: DefinitionTag[]) => {
-        return data.find((tag) => tag.dictionaryId === props.dictionaryEntry.dictionaryId);
-      },
-    })),
-  }));
+  const definitionsTags = () =>
+    props.dictionaryEntry.definitionTags
+      .split(" ")
+      .map((tagName) => tagName.trim())
+      .filter(Boolean);
+
+  const [definitionTagsData] = createResource(definitionsTags(), async (definitionsTags) => {
+    const data: DefinitionTag[] = [];
+    for (const tagName of definitionsTags) {
+      const result = await api
+        .get<Result<DefinitionTag[]>>(`definition_tags/search`, {
+          searchParams: { name: tagName },
+        })
+        .json();
+      data.push(...result.data);
+    }
+    return data;
+  });
 
   return (
     <div class="flex flex-col gap-1">
       <div class="text-3xl">{props.dictionaryEntry.expression}</div>
       <div class="flex flex-wrap gap-1">
-        <For each={query}>
-          {(query) => {
-            return (
-              <Show when={query.data}>
-                <div class="badge badge-info badge-sm font-bold">{query.data?.name}</div>
-              </Show>
-            );
+        <For each={definitionTagsData()}>
+          {(data) => {
+            return <div class="badge badge-info badge-sm font-bold">{data.name}</div>;
           }}
         </For>
       </div>
@@ -63,11 +73,18 @@ function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JS
 }
 
 export function Popup(props: { expressions: string[] }) {
-  const query = useQueries(() => ({
-    queries: props.expressions.map((expression) => ({
-      ...queries.dictionaryEntries.search(expression),
-    })),
-  }));
+  const [dictionaryEntries] = createResource(props.expressions, async (expressions) => {
+    const data: DictionaryEntry[] = [];
+    for (const expression of expressions) {
+      const result = await api
+        .get<Result<DictionaryEntry[]>>(`dictionary_entries/search`, {
+          searchParams: { expression },
+        })
+        .json();
+      data.push(...result.data);
+    }
+    return data;
+  });
 
   return (
     <div
@@ -78,20 +95,16 @@ export function Popup(props: { expressions: string[] }) {
         right: 0,
       }}
     >
-      <For each={query}>
-        {(query) => (
-          <For each={query.data}>
-            {(entry) => (
-              //  TODO: fix hardcoded url
-              <DefinirionEntry dictionaryEntry={entry}>
-                <ShadowRoot css={`http://localhost:45636/media/${entry.dictionaryId}/styles.css`}>
-                  <For each={entry.definitions}>
-                    {(definition) => <DefinitionRenderer definition={definition} />}
-                  </For>
-                </ShadowRoot>
-              </DefinirionEntry>
-            )}
-          </For>
+      <For each={dictionaryEntries()}>
+        {(entry) => (
+          //  TODO: fix hardcoded url
+          <DefinirionEntry dictionaryEntry={entry}>
+            <ShadowRoot css={`http://localhost:45636/media/${entry.dictionaryId}/styles.css`}>
+              <For each={entry.definitions}>
+                {(definition) => <DefinitionRenderer definition={definition} />}
+              </For>
+            </ShadowRoot>
+          </DefinirionEntry>
         )}
       </For>
     </div>
