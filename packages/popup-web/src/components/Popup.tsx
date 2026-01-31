@@ -1,19 +1,10 @@
-import type { DictionaryEntry, DefinitionTag } from "@repo/server/types/db";
+import type { DictionaryEntry } from "@repo/server/types/db";
 import type { Definition, DetailedDefinition } from "@repo/server/types/dictionary-term-bank-v3";
 import { StructuredContentComponent } from "./StructuredContent";
 import { ImageContent } from "./ImageContent";
-import { createResource, For, type JSXElement } from "solid-js";
+import { For, type JSXElement } from "solid-js";
 import { ShadowRoot } from "./ShadowRoot";
-import ky from "ky";
-
-type Result<T> = {
-  result: "success";
-  data: T;
-};
-
-const api = ky.create({
-  prefixUrl: "http://localhost:45636",
-});
+import { useDefinitionTags, useDictionaryEntries } from "../util/resources";
 
 function DefinitionRenderer(props: { definition: Definition }) {
   if (!props.definition) return null;
@@ -38,30 +29,18 @@ function DefinitionRenderer(props: { definition: Definition }) {
 }
 
 function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JSXElement }) {
-  const definitionsTags = () =>
+  const definitionsTagNames = () =>
     props.dictionaryEntry.definitionTags
       .split(" ")
       .map((tagName) => tagName.trim())
       .filter(Boolean);
-
-  const [definitionTagsData] = createResource(definitionsTags(), async (definitionsTags) => {
-    const data: DefinitionTag[] = [];
-    for (const tagName of definitionsTags) {
-      const result = await api
-        .get<Result<DefinitionTag[]>>(`definition_tags/search`, {
-          searchParams: { name: tagName },
-        })
-        .json();
-      data.push(...result.data);
-    }
-    return data;
-  });
+  const [definitionTags] = useDefinitionTags(definitionsTagNames());
 
   return (
     <div class="flex flex-col gap-1">
       <div class="text-3xl">{props.dictionaryEntry.expression}</div>
       <div class="flex flex-wrap gap-1">
-        <For each={definitionTagsData()}>
+        <For each={definitionTags()}>
           {(data) => {
             return <div class="badge badge-info badge-sm font-bold">{data.name}</div>;
           }}
@@ -73,18 +52,7 @@ function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JS
 }
 
 export function Popup(props: { expressions: string[] }) {
-  const [dictionaryEntries] = createResource(props.expressions, async (expressions) => {
-    const data: DictionaryEntry[] = [];
-    for (const expression of expressions) {
-      const result = await api
-        .get<Result<DictionaryEntry[]>>(`dictionary_entries/search`, {
-          searchParams: { expression },
-        })
-        .json();
-      data.push(...result.data);
-    }
-    return data;
-  });
+  const [dictionaryEntries] = useDictionaryEntries(props.expressions);
 
   return (
     <div
