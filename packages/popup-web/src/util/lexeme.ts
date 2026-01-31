@@ -46,6 +46,12 @@ export class LexemesProcessor {
     return -1;
   }
 
+  getLexeme(globalIndex: number): Lexeme | null {
+    const index = this.getLexemeIndex(globalIndex);
+    if (index === -1) return null;
+    return this.#lexemes[index]!;
+  }
+
   getWordClipped(globalIndex: number): string | null {
     const index = this.getLexemeIndex(globalIndex);
     if (index === -1) return null;

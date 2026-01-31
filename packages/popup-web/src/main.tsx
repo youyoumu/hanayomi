@@ -8,6 +8,44 @@ import "./styles/main.css";
 import { setupTailwind } from "./util/dev";
 import { LexemesProcessor } from "./util/lexeme";
 
+async function getExpressions({
+  text,
+  offset,
+  queryClient,
+}: {
+  text: string;
+  offset: number;
+  queryClient: QueryClient;
+}) {
+  const lexemes = await queryClient.fetchQuery({
+    ...queries.tokenize.detail(text),
+  });
+
+  const lexemesProcessor = LexemesProcessor.new(lexemes);
+  const lexeme = lexemesProcessor.getLexeme(offset);
+  if (!lexeme) return [];
+
+  const firstTokenLemma = lexemesProcessor.getFirstTokenLemma(lexeme);
+
+  const wordClipped = lexemesProcessor.getWordClipped(offset);
+  const lexemesClipped = wordClipped
+    ? await queryClient.fetchQuery({
+        ...queries.tokenize.detail(wordClipped),
+      })
+    : [];
+  const lexemeClipped = lexemesClipped[0];
+  const lexemesClippedProcessor = LexemesProcessor.new(lexemesClipped);
+  const firstTokenLemmaClipped = lexemeClipped
+    ? lexemesClippedProcessor.getFirstTokenLemma(lexemeClipped)
+    : null;
+
+  const expressions = uniq(
+    [firstTokenLemmaClipped, lexeme.word, firstTokenLemma].filter(Boolean),
+  ) as string[];
+
+  return expressions;
+}
+
 export function init() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -25,36 +63,12 @@ export function init() {
 
   const scanText = async (e: MouseEvent) => {
     // console.log(e.clientX, e.clientY);
-    const result = document.caretPositionFromPoint(e.clientX, e.clientY);
+    const result = document.caretPositionFromPoint(e.clientX - 5, e.clientY);
     if (result && result.offsetNode.nodeType === Node.TEXT_NODE) {
       const node = result.offsetNode as Text;
       const offset = result.offset;
       const text = node.data;
-
-      const lexemes = await queryClient.fetchQuery({
-        ...queries.tokenize.detail(text),
-      });
-
-      const lexemesProcessor = LexemesProcessor.new(lexemes);
-      const lexemeIndex = lexemesProcessor.getLexemeIndex(offset);
-      const lexeme = lexemes[lexemeIndex];
-      if (!lexeme) return;
-
-      const firstTokenLemma = lexemesProcessor.getFirstTokenLemma(lexeme);
-
-      const wordClipped = lexemesProcessor.getWordClipped(offset);
-      const lexemes2 = wordClipped
-        ? await queryClient.fetchQuery({
-            ...queries.tokenize.detail(wordClipped),
-          })
-        : [];
-      const lexeme2 = lexemes2[0];
-      const lexemesProcessor2 = LexemesProcessor.new(lexemes2);
-      const firstTokenLemma2 = lexeme2 ? lexemesProcessor2.getFirstTokenLemma(lexeme2) : null;
-
-      const expressions = uniq(
-        [firstTokenLemma2, lexeme.word, firstTokenLemma].filter(Boolean),
-      ) as string[];
+      const expressions = await getExpressions({ text, offset, queryClient });
 
       root.innerHTML = "";
       render(
