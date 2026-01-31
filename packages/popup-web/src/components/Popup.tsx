@@ -70,7 +70,14 @@ export function Popup(props: { expressions: string[] }) {
   }));
 
   return (
-    <div class="p-2 w-[600px] h-[400px] overflow-scroll">
+    <div
+      class="p-2 w-[600px] h-[400px] overflow-scroll"
+      style={{
+        position: "absolute",
+        top: 0,
+        right: 0,
+      }}
+    >
       <For each={query}>
         {(query) => (
           <For each={query.data}>
