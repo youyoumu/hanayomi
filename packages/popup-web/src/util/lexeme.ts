@@ -5,7 +5,7 @@ export class LexemesProcessor {
   #lexemes: Lexeme[];
 
   static cache = new WeakMap<Lexeme[], LexemesProcessor>();
-  static new(lexemes: Lexeme[]): LexemesProcessor {
+  static new(lexemes: Lexeme[] = []): LexemesProcessor {
     const cache = LexemesProcessor.cache;
     let instance: LexemesProcessor;
     if (cache.has(lexemes)) {
@@ -20,9 +20,9 @@ export class LexemesProcessor {
   private constructor(lexemes: Lexeme[]) {
     this.#lexemes = lexemes;
     let currentLength = 0;
-    for (const l of lexemes) {
+    for (const lexeme of lexemes) {
       this.#offsets.push(currentLength);
-      currentLength += l.word.length;
+      currentLength += lexeme.word.length;
     }
   }
 
@@ -46,15 +46,15 @@ export class LexemesProcessor {
     return -1;
   }
 
-  getLexeme(globalIndex: number): Lexeme | null {
+  getLexeme(globalIndex: number) {
     const index = this.getLexemeIndex(globalIndex);
-    if (index === -1) return null;
+    if (index === -1) return;
     return this.#lexemes[index]!;
   }
 
-  getWordClipped(globalIndex: number): string | null {
+  getWordClipped(globalIndex: number) {
     const index = this.getLexemeIndex(globalIndex);
-    if (index === -1) return null;
+    if (index === -1) return;
 
     const lexeme = this.#lexemes[index]!;
     const startOffset = this.#offsets[index]!;
@@ -62,7 +62,7 @@ export class LexemesProcessor {
     return lexeme.word.slice(relativeOffset);
   }
 
-  getFirstTokenLemma(word: Lexeme) {
-    return word.tokens[0]?.lemma;
+  getFirstTokenLemma(word: Lexeme | undefined) {
+    return word?.tokens[0]?.lemma;
   }
 }

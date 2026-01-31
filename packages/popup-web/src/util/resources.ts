@@ -1,8 +1,9 @@
 import type { DefinitionTag, DictionaryEntry } from "@repo/server/types/db";
+import type { Lexeme } from "@repo/server/types/mecab-ipadic";
 import { createContextProvider } from "@solid-primitives/context";
 import { makeCache } from "@solid-primitives/resource";
 import ky from "ky";
-import { createResource } from "solid-js";
+import { createMemo, createResource } from "solid-js";
 
 type Result<T> = {
   result: "success";
@@ -14,35 +15,61 @@ const api = ky.create({
 });
 
 const [ResourcesContextProvider, useResources_] = createContextProvider(() => {
-  const definitionTagsFc = makeCache(async ([_key, name]: ["definitionTags", string]) => {
-    const result = await api
+  type DefinitionTagsKey = ["definitionTags", string];
+  const [definitionTagsFc] = makeCache(async ([_key, name]: DefinitionTagsKey) => {
+    return api
       .get<Result<DefinitionTag[]>>(`definition_tags/search`, {
         searchParams: { name },
       })
-      .json();
-    return result.data;
+      .json()
+      .then((result) => result.data);
   });
-  const useDefinitionTags = (name: string) => {
-    return createResource(["definitionTags", name], definitionTagsFc[0]);
+  const useDefinitionTags = (name: () => string | undefined) => {
+    const param = createMemo(() => {
+      const name_ = name();
+      return name_ ? (["definitionTags", name_] satisfies DefinitionTagsKey) : undefined;
+    });
+    return createResource(param, definitionTagsFc);
   };
 
-  const dictionaryEntriesCh = makeCache(
-    async ([_key, expression]: ["dictionaryEntries", string]) => {
-      const result = await api
-        .get<Result<DictionaryEntry[]>>(`dictionary_entries/search`, {
-          searchParams: { expression },
-        })
-        .json();
-      return result.data;
-    },
-  );
-  const useDictionaryEntries = (expression: string) => {
-    return createResource(["dictionaryEntries", expression], dictionaryEntriesCh[0]);
+  type DictionaryEntriesKey = ["dictionaryEntries", string];
+  const [dictionaryEntriesFc] = makeCache(async ([_key, expression]: DictionaryEntriesKey) => {
+    return api
+      .get<Result<DictionaryEntry[]>>(`dictionary_entries/search`, {
+        searchParams: { expression },
+      })
+      .json()
+      .then((result) => result.data);
+  });
+  const useDictionaryEntries = (expression: () => string | undefined) => {
+    const param = createMemo(() => {
+      const expression_ = expression();
+      return expression_
+        ? (["dictionaryEntries", expression_] satisfies DictionaryEntriesKey)
+        : undefined;
+    });
+    return createResource(param, dictionaryEntriesFc);
+  };
+
+  type TokenizeKey = ["tokenize", string];
+  const [tokenizeFc] = makeCache(async ([_key, sentence]: TokenizeKey) => {
+    return api
+      .get<Result<Lexeme[]>>(`tokenize`, { searchParams: { sentence } })
+      .json()
+      .then((result) => result.data);
+  });
+  const useTokenize = (sentence: () => string | undefined) => {
+    const param = createMemo(() => {
+      const sentence_ = sentence();
+      return sentence_ ? (["tokenize", sentence_] satisfies TokenizeKey) : undefined;
+    });
+    return createResource(param, tokenizeFc);
   };
 
   return {
     useDefinitionTags,
     useDictionaryEntries,
+    useTokenize,
   };
 });
 
