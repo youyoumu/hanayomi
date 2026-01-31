@@ -2,9 +2,10 @@ import type { DictionaryEntry } from "@repo/server/types/db";
 import type { Definition, DetailedDefinition } from "@repo/server/types/dictionary-term-bank-v3";
 import { StructuredContentComponent } from "./StructuredContent";
 import { ImageContent } from "./ImageContent";
-import { For, type JSXElement } from "solid-js";
+import { createMemo, For, Show, type JSXElement } from "solid-js";
 import { ShadowRoot } from "./ShadowRoot";
-import { useDefinitionTags, useDictionaryEntries } from "../util/resources";
+import { useResources } from "../util/resources";
+import { uniqBy } from "es-toolkit";
 
 function DefinitionRenderer(props: { definition: Definition }) {
   if (!props.definition) return null;
@@ -34,16 +35,26 @@ function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JS
       .split(" ")
       .map((tagName) => tagName.trim())
       .filter(Boolean);
-  const [definitionTags] = useDefinitionTags(definitionsTagNames());
+  const resources = useResources();
+  const multipleDefinitionTags = createMemo(() => {
+    return definitionsTagNames().map((name) => resources.useDefinitionTags(name));
+  });
+  const definitionTags = createMemo(() => {
+    const multipleData = multipleDefinitionTags().map(([data]) => data());
+    const data = multipleData.flat().filter(Boolean);
+    return uniqBy(data, (tag) => tag?.id);
+  });
 
   return (
     <div class="flex flex-col gap-1">
       <div class="text-3xl">{props.dictionaryEntry.expression}</div>
       <div class="flex flex-wrap gap-1">
         <For each={definitionTags()}>
-          {(data) => {
-            return <div class="badge badge-info badge-sm font-bold">{data.name}</div>;
-          }}
+          {(tag) => (
+            <Show when={tag}>
+              {(tag) => <div class="badge badge-info badge-sm font-bold">{tag().name}</div>}
+            </Show>
+          )}
         </For>
       </div>
       <div>{props.children}</div>
@@ -52,7 +63,15 @@ function DefinirionEntry(props: { dictionaryEntry: DictionaryEntry; children: JS
 }
 
 export function Popup(props: { expressions: string[] }) {
-  const [dictionaryEntries] = useDictionaryEntries(props.expressions);
+  const resources = useResources();
+  const multipleDictionaryEntries = createMemo(() => {
+    return props.expressions.map((expression) => resources.useDictionaryEntries(expression));
+  });
+  const dictionaryEntries = createMemo(() => {
+    const multipleData = multipleDictionaryEntries().map(([data]) => data());
+    const data = multipleData.flat().filter(Boolean);
+    return uniqBy(data, (entry) => entry?.id);
+  });
 
   return (
     <div
@@ -65,14 +84,18 @@ export function Popup(props: { expressions: string[] }) {
     >
       <For each={dictionaryEntries()}>
         {(entry) => (
-          //  TODO: fix hardcoded url
-          <DefinirionEntry dictionaryEntry={entry}>
-            <ShadowRoot css={`http://localhost:45636/media/${entry.dictionaryId}/styles.css`}>
-              <For each={entry.definitions}>
-                {(definition) => <DefinitionRenderer definition={definition} />}
-              </For>
-            </ShadowRoot>
-          </DefinirionEntry>
+          // TODO: fix hardcoded url
+          <Show when={entry}>
+            {(entry) => (
+              <DefinirionEntry dictionaryEntry={entry()}>
+                <ShadowRoot css={`http://localhost:45636/media/${entry().dictionaryId}/styles.css`}>
+                  <For each={entry().definitions}>
+                    {(definition) => <DefinitionRenderer definition={definition} />}
+                  </For>
+                </ShadowRoot>
+              </DefinirionEntry>
+            )}
+          </Show>
         )}
       </For>
     </div>

@@ -15,6 +15,8 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.5",
+    "@solid-primitives/context": "^0.3.2",
+    "@solid-primitives/resource": "^0.4.3",
     "es-toolkit": "^1.44.0",
     "ky": "^1.14.2",
     "solid-js": "^1.9.10"

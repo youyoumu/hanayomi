@@ -20,6 +20,12 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.7.5
         version: 1.7.5
+      '@solid-primitives/context':
+        specifier: ^0.3.2
+        version: 0.3.2(solid-js@1.9.10)
+      '@solid-primitives/resource':
+        specifier: ^0.4.3
+        version: 0.4.3(solid-js@1.9.10)
       es-toolkit:
         specifier: ^1.44.0
         version: 1.44.0
@@ -372,6 +378,16 @@ packages:
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
+
+  '@solid-primitives/context@0.3.2':
+    resolution: {integrity: sha512-6fvTtpK17PFHnUf/UOc1TzBjd+kLFjtA62aRFEm1kDP9ufTo7FYW2kUzQAWbfbRHi30yjBJtopbR8qd6nShwyg==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
+  '@solid-primitives/resource@0.4.3':
+    resolution: {integrity: sha512-bu9z9yORJLZPJzrPSuL+yfhq/8WFWNI4EPTz2j9NeMym1WlZFGH0j0hGULRJY3/1PeQeWayEc0bM+X/8ICHVBQ==}
+    peerDependencies:
+      solid-js: ^1.6.0
 
   '@tailwindcss/node@4.1.18':
     resolution: {integrity: sha512-DoR7U1P7iYhw16qJ49fgXUlry1t4CpXeErJHnQ44JgTSKMaZUdf17cfn5mHchfJ4KRBZRFA/Coo+MUF5+gOaCQ==}
@@ -1295,6 +1311,14 @@ snapshots:
   '@sec-ant/readable-stream@0.4.1': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
+
+  '@solid-primitives/context@0.3.2(solid-js@1.9.10)':
+    dependencies:
+      solid-js: 1.9.10
+
+  '@solid-primitives/resource@0.4.3(solid-js@1.9.10)':
+    dependencies:
+      solid-js: 1.9.10
 
   '@tailwindcss/node@4.1.18':
     dependencies:

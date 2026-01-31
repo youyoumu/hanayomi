@@ -7,6 +7,7 @@ import { setupTailwind } from "./util/dev";
 import { LexemesProcessor } from "./util/lexeme";
 import ky from "ky";
 import type { Lexeme } from "@repo/server/types/mecab-ipadic";
+import { ResourcesContextProvider } from "./util/resources";
 
 type Result<T> = {
   result: "success";
@@ -67,7 +68,14 @@ export function init() {
       const expressions = await getExpressions({ text, offset });
 
       root.innerHTML = "";
-      render(() => <Popup expressions={expressions} />, root);
+      render(
+        () => (
+          <ResourcesContextProvider>
+            <Popup expressions={expressions} />
+          </ResourcesContextProvider>
+        ),
+        root,
+      );
     }
   };
   const dScanText = debounce(scanText, 100);
